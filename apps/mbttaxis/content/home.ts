@@ -20,9 +20,12 @@ export const home = {
     secondaryCta: "Parler à quelqu’un",
     secondaryHref: "/centrale",
     youtubeId: "KhuPKHfK2ZA",
-    // Vidéo auto-hébergée (boucle sans coupure). Dès que public/videos/hero.mp4
-    // existe, passer à "/videos/hero.mp4" : le lecteur YouTube n’est alors plus utilisé.
-    videoSrc: undefined as string | undefined,
+    // Vidéo auto-hébergée (boucle sans coupure) ; remplace le lecteur YouTube.
+    video: {
+      webm: "/videos/handycab-1080.webm",
+      mp4: "/videos/handycab-1080.mp4",
+      poster: "/videos/handycab-poster.jpg",
+    } as { webm: string; mp4: string; poster?: string } | undefined,
     badges: [
       "Transport médico-sanitaire agréé",
       "Véhicules adaptés PMR",

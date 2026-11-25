@@ -30,8 +30,8 @@ export default function HomePage() {
       </div>
 
       <section className="hero-curve relative min-h-[85vh] overflow-hidden bg-muted pt-36 pb-40">
-        {home.hero.videoSrc ? (
-          <HeroVideoFile src={home.hero.videoSrc} />
+        {home.hero.video ? (
+          <HeroVideoFile {...home.hero.video} />
         ) : (
           <HeroVideo youtubeId={home.hero.youtubeId} />
         )}

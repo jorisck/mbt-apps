@@ -1,5 +1,6 @@
 type Props = {
-  src: string;
+  webm: string;
+  mp4: string;
   poster?: string;
 };
 
@@ -7,12 +8,11 @@ type Props = {
  * Fond vidéo auto-hébergé : `loop` natif du navigateur, sans UI,
  * donc aucun écran noir ni bouton play au relancement.
  */
-export function HeroVideoFile({ src, poster }: Props) {
+export function HeroVideoFile({ webm, mp4, poster }: Props) {
   return (
     <div className="absolute inset-0 overflow-hidden bg-ink" aria-hidden>
       <video
         className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-        src={src}
         poster={poster}
         autoPlay
         muted
@@ -22,7 +22,10 @@ export function HeroVideoFile({ src, poster }: Props) {
         disablePictureInPicture
         disableRemotePlayback
         tabIndex={-1}
-      />
+      >
+        <source src={webm} type="video/webm" />
+        <source src={mp4} type="video/mp4" />
+      </video>
 
       {/* Filtre noir permanent + dégradés lisibilité */}
       <div className="absolute inset-0 bg-black/55" />
