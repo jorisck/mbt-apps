@@ -2,98 +2,160 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { site } from "../../content/site";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { nav, site } from "../../content/site";
 import { Icon } from "./Icon";
 
-const nav = [
-  { href: "#flotte", label: "Véhicules" },
-  { href: "#chauffeurs", label: "Chauffeurs" },
-  { href: "#application", label: "Application" },
-  { href: "#tarifs", label: "Tarifs & agréments" },
-  { href: "#contact", label: "Contact" },
-] as const;
-
 export function Header() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  function isActive(href: string) {
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-brand-border bg-white/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-6 px-6">
-        <Link
-          href="/"
-          className="group shrink-0"
-          aria-label="HandyCab — Accueil"
-        >
-          <Image
-            src="/logo.png"
-            alt="HandyCab"
-            width={48}
-            height={48}
-            className="h-12 w-12 rounded-xl object-contain shadow-[0_2px_8px_rgba(249,205,26,0.25)]"
-            priority
-          />
-        </Link>
-
-        <nav className="hidden items-center gap-1 lg:flex">
-          {nav.map((item) => (
+    <header className="fixed inset-x-0 top-0 z-50">
+      <div className="bg-brand-dark text-white">
+        <div className="mx-auto flex h-8 max-w-7xl items-center justify-between gap-4 px-6 text-[11px] sm:text-[12px]">
+          <p className="truncate text-slate-300">
+            Besoin d’aide pour réserver ? Appelez le{" "}
             <a
-              key={item.href}
-              href={item.href}
-              className="rounded-full px-3.5 py-1.5 text-[14px] font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-brand-dark"
+              href={site.phoneHref}
+              className="font-semibold text-brand-yellow hover:underline"
             >
-              {item.label}
+              {site.phoneDisplay}
             </a>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-3">
+            .
+          </p>
           <a
             href={site.phoneHref}
-            className="hidden flex-col pr-1 text-right leading-none xl:flex"
+            className="hidden shrink-0 items-center gap-1.5 font-semibold text-white transition-colors hover:text-brand-yellow sm:inline-flex"
           >
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-              Dispatch 24/7 PMR
-            </span>
-            <span className="text-[14px] font-semibold text-brand-dark transition-colors hover:text-brand-accent">
-              {site.phone}
-            </span>
+            <Icon name="phone" className="text-[11px] text-brand-yellow" />
+            Appeler
           </a>
-          <a
-            href="#calculateur"
-            className="inline-flex items-center gap-2 rounded-full bg-brand-yellow px-5 py-2.5 text-[13px] font-bold text-brand-charcoal shadow-[0_4px_14px_rgba(249,205,26,0.3)] transition-all hover:-translate-y-0.5 hover:bg-brand-yellow-dark hover:shadow-[0_6px_20px_rgba(249,205,26,0.4)]"
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6">
+        <div className="flex items-center gap-3 rounded-full border border-brand-border bg-white px-3 py-2 shadow-sm sm:px-4 lg:px-6">
+          <Link
+            href="/"
+            className="shrink-0"
+            aria-label="Handycab — Accueil"
           >
-            <span>Réserver</span>
-            <Icon name="arrow" />
-          </a>
+            <Image
+              src="/logo.png"
+              alt="Handycab"
+              width={44}
+              height={44}
+              className="h-10 w-10 object-contain sm:h-11 sm:w-11"
+              priority
+            />
+          </Link>
+
+          <nav
+            className="ml-auto hidden min-w-0 items-center gap-0.5 xl:flex xl:gap-1"
+            aria-label="Principal"
+          >
+            {nav.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-medium leading-none transition-colors xl:px-3 ${
+                    active
+                      ? "bg-brand-dark text-white"
+                      : "text-slate-600 hover:text-brand-dark"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+            <a
+              href={site.phoneHref}
+              className="ml-2 inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-brand-dark px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-black"
+            >
+              <Icon name="phone" className="text-brand-yellow" />
+              Appeler
+            </a>
+            <a
+              href={site.bookingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-brand-yellow px-4 py-2 text-[13px] font-bold text-brand-charcoal transition-colors hover:bg-brand-yellow-dark"
+            >
+              Réserver
+              <Icon name="arrow" />
+            </a>
+          </nav>
+
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-brand-border text-brand-dark lg:hidden"
+            className="ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-brand-border text-brand-dark xl:hidden"
             aria-expanded={open}
-            aria-label="Menu"
+            aria-controls="mobile-menu"
+            aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
             onClick={() => setOpen((v) => !v)}
           >
             <i className={`fa ${open ? "fa-times" : "fa-bars"}`} aria-hidden />
           </button>
         </div>
-      </div>
 
-      {open ? (
-        <div className="border-t border-brand-border bg-white px-6 py-4 lg:hidden">
-          <nav className="flex flex-col gap-1">
-            {nav.map((item) => (
+        {open ? (
+          <div
+            id="mobile-menu"
+            className="mt-2 max-h-[80vh] overflow-y-auto rounded-[1.5rem] border border-brand-border bg-white p-4 shadow-sm xl:hidden"
+          >
+            <nav className="flex flex-col gap-1" aria-label="Mobile">
+              {nav.map((item) => {
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`rounded-full px-4 py-3 text-[15px] font-medium transition-colors ${
+                      active
+                        ? "bg-brand-dark text-white"
+                        : "text-slate-700 hover:bg-brand-surface"
+                    }`}
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
               <a
-                key={item.href}
-                href={item.href}
-                className="rounded-xl px-3 py-2.5 text-[15px] font-medium text-slate-700 hover:bg-brand-surface"
+                href={site.phoneHref}
+                className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-brand-dark px-4 py-3 text-[14px] font-semibold text-white"
                 onClick={() => setOpen(false)}
               >
-                {item.label}
+                <Icon name="phone" className="text-brand-yellow" />
+                Appeler {site.phone}
               </a>
-            ))}
-          </nav>
-        </div>
-      ) : null}
+              <a
+                href={site.bookingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-yellow px-4 py-3 text-[14px] font-bold text-brand-charcoal"
+                onClick={() => setOpen(false)}
+              >
+                Réserver un taxi
+                <Icon name="arrow" />
+              </a>
+            </nav>
+          </div>
+        ) : null}
+      </div>
     </header>
   );
 }

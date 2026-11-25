@@ -42,7 +42,7 @@ export function HandycabCard() {
               <div className="mb-4 flex items-center gap-3">
                 <Image
                   src="/images/logos/logo-handycab.png"
-                  alt="HandyCab"
+                  alt="Handycab"
                   width={56}
                   height={56}
                   className="h-14 w-14 rounded-2xl object-contain shadow-sm"
@@ -58,32 +58,42 @@ export function HandycabCard() {
                   {handycab.eyebrow}
                 </p>
               </div>
-              <h2
-                className="font-[family-name:var(--font-poppins)] text-3xl font-bold tracking-tight text-ink sm:text-4xl"
-              >
-                <span style={{ color: HC.ink }}>{handycab.title}</span>
+              <h2 className="font-[family-name:var(--font-poppins)] text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+                {handycab.title}
               </h2>
-              <p
-                className="mt-3 text-xl font-semibold sm:text-2xl"
-                style={{ color: HC.ink }}
-              >
+              <p className="mt-3 text-xl font-semibold sm:text-2xl" style={{ color: HC.ink }}>
                 {handycab.tagline}
               </p>
               <p className="mt-4 max-w-xl text-base leading-relaxed" style={{ color: HC.body }}>
                 {handycab.text}
               </p>
+              <ul className="mt-5 space-y-2">
+                {handycab.points.map((point) => (
+                  <li key={point} className="flex gap-2 text-sm" style={{ color: HC.body }}>
+                    <i className="fa fa-check mt-0.5 shrink-0" aria-hidden />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="shrink-0">
+            <div className="flex shrink-0 flex-col gap-3">
               <Link
-                href={handycab.href}
+                href={handycab.primaryHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-full px-7 py-3.5 text-base font-semibold shadow-sm transition-opacity hover:opacity-90"
                 style={{ backgroundColor: HC.yellow, color: HC.ink }}
               >
-                {handycab.cta}
+                {handycab.primaryCta}
                 <i className="fa fa-external-link ml-2 text-sm" aria-hidden />
+              </Link>
+              <Link
+                href={handycab.secondaryHref}
+                className="inline-flex items-center justify-center rounded-full border px-7 py-3 text-base font-semibold transition-colors hover:bg-white"
+                style={{ borderColor: HC.border, color: HC.ink }}
+              >
+                {handycab.secondaryCta}
               </Link>
             </div>
           </div>

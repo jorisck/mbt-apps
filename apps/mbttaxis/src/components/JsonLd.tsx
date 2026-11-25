@@ -9,7 +9,7 @@ export function JsonLd() {
     logo: `${site.url}/logo.png`,
     image: `${site.url}/og-image.png`,
     email: site.email,
-    telephone: site.phone,
+    telephone: "+32 2 426 45 53",
     address: {
       "@type": "PostalAddress",
       streetAddress: site.address.street,

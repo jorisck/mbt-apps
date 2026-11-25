@@ -1,37 +1,48 @@
+import { site } from "./site";
+
 export const footer = {
-  usefulLinks: {
-    title: "Liens utiles",
+  brand: {
+    title: "MBT Taxis",
+    tagline: "La mobilité pour tous depuis 1991.",
+    agreement:
+      "Entreprise agréée en tant que service de transport médico-sanitaire sur le territoire de la Région bilingue de Bruxelles-Capitale — agrément n° 30.01.16.",
+  },
+  services: {
+    title: "Services",
     links: [
-      { href: "/", label: "Accueil" },
-      { href: "/adaptation-tpmr", label: "Adaptation TPMR" },
-      { href: "/reservation-tpmr", label: "Réservation Taxis PMR" },
-      { href: "/tarifs-vsl", label: "Tarifs VSL" },
+      { href: "/services/entreprises", label: "Taxi pour entreprises" },
+      { href: "/services/quotidien", label: "Taxi au quotidien" },
+      { href: "/services/vsl", label: "Transport VSL" },
+      { href: "/services/pmr", label: "Taxi PMR" },
+      { href: "/services/adaptation", label: "Adaptation PMR" },
+      { href: "/services/location-vente", label: "Location & vente" },
     ],
   },
-  company: {
-    title: "L'entreprise MBT taxis",
+  discover: {
+    title: "Découvrir",
     links: [
-      { href: "/cookie-policy", label: "Politique de confidentialité" },
-      { href: "/cookie-policy", label: "Informations légales" },
+      { href: "/handycab", label: "Handycab" },
+      { href: "/centrale", label: "Centrale téléphonique" },
+      { href: "/about-us", label: "À propos" },
+      { href: "/reservation", label: "Réserver" },
+      { href: "/contactus", label: "Contact" },
     ],
   },
-  assistance: {
-    title: "Assistance",
-    contactLabel: "Contactez-nous",
-    contactHref: "/contactus",
-    email: "pmr@mbt.be",
-    phone: "+32 2 426 45 53",
-    phoneHref: "tel:+3224264553",
+  contact: {
+    title: "Coordonnées",
+    phone: site.phone,
+    phoneHref: site.phoneHref,
+    email: site.email,
+    address: site.address.full,
+    hours: site.hours,
+  },
+  legal: {
+    cookies: { href: "/cookie-policy", label: "Cookies et confidentialité" },
   },
   social: {
     title: "Suivez-nous",
     facebook: "https://www.facebook.com/",
     linkedin: "https://www.linkedin.com/",
   },
-  agreement:
-    "Entreprise agréée en tant que service de transport médico-sanitaire sur le territoire de la région bilingue de Bruxelles-Capitale par les services du collège réuni de la Commission communautaire française (COCOF) - N° d'agrément 30.01.16",
-  slogan: "Votre partenaire mobilité depuis 1991.",
   copyright: "Copyright © MBT Taxis",
-  cookiePolicyLabel: "Politique en matière de cookies",
-  address: "Rue des Béguines 160, 1080 Molenbeek-Saint-Jean",
 } as const;

@@ -24,12 +24,12 @@ const raleway = Raleway({
 });
 
 const description =
-  "Transport, taxi PMR et VSL à Bruxelles. Votre partenaire mobilité depuis 1991.";
+  "MBT Taxis organise vos trajets professionnels, quotidiens, PMR et médico-sanitaires à Bruxelles et en Belgique. Réservez en ligne ou appelez notre centrale.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: "MBT Taxis | mbttaxis",
+    default: "MBT Taxis — Taxi, PMR, VSL et mobilité à Bruxelles",
     template: "%s",
   },
   description,
@@ -48,20 +48,20 @@ export const metadata: Metadata = {
     locale: "fr_BE",
     url: site.url,
     siteName: site.name,
-    title: "MBT Taxis — Transport, Taxi PMR & VSL",
+    title: "MBT Taxis — Taxi, PMR, VSL et mobilité à Bruxelles",
     description,
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "MBT Taxis — Transport, Taxi PMR & VSL à Bruxelles",
+        alt: "MBT Taxis — Une mobilité qui s’adapte à vous",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "MBT Taxis — Transport, Taxi PMR & VSL",
+    title: "MBT Taxis — Taxi, PMR, VSL et mobilité à Bruxelles",
     description,
     images: ["/og-image.png"],
   },

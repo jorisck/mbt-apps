@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   youtubeId: string;
@@ -10,6 +10,9 @@ type YTPlayer = {
   playVideo: () => void;
   mute: () => void;
   seekTo: (seconds: number, allowSeekAhead: boolean) => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  getPlayerState: () => number;
   destroy: () => void;
 };
 
@@ -35,8 +38,7 @@ declare global {
 }
 
 const YT_SCRIPT = "https://www.youtube.com/iframe_api";
-const YT_ENDED = 0;
-const YT_PAUSED = 2;
+const YT_PLAYING = 1;
 
 function loadYouTubeApi(): Promise<void> {
   if (window.YT?.Player) return Promise.resolve();
@@ -59,12 +61,66 @@ function loadYouTubeApi(): Promise<void> {
   });
 }
 
+/**
+ * Fond vidéo YouTube.
+ * YouTube affiche toujours un flash play/pause au seek/loop dans l’iframe
+ * (non stylable). On masque donc brièvement l’iframe pendant le relancement.
+ */
 export function HeroVideo({ youtubeId }: Props) {
   const shellRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
+  const loopTimerRef = useRef<number | null>(null);
+  const restartingRef = useRef(false);
+  const [mask, setMask] = useState(true); // masque jusqu’au premier play
 
   useEffect(() => {
     let cancelled = false;
+    let unmaskTimer: number | null = null;
+
+    const clearLoopTimer = () => {
+      if (loopTimerRef.current != null) {
+        window.clearInterval(loopTimerRef.current);
+        loopTimerRef.current = null;
+      }
+    };
+
+    const coverForRestart = (ms = 700) => {
+      setMask(true);
+      if (unmaskTimer != null) window.clearTimeout(unmaskTimer);
+      unmaskTimer = window.setTimeout(() => {
+        if (!cancelled) setMask(false);
+      }, ms);
+    };
+
+    const startSoftLoop = (player: YTPlayer) => {
+      clearLoopTimer();
+      loopTimerRef.current = window.setInterval(() => {
+        try {
+          if (restartingRef.current) return;
+          const duration = player.getDuration();
+          const current = player.getCurrentTime();
+          if (duration > 2 && current >= duration - 1.5) {
+            restartingRef.current = true;
+            // Masque opaque AVANT le seek → le bouton pause YouTube reste invisible
+            coverForRestart(900);
+            window.setTimeout(() => {
+              try {
+                player.mute();
+                player.seekTo(0.2, true);
+                player.playVideo();
+              } catch {
+                /* ignore */
+              }
+              window.setTimeout(() => {
+                restartingRef.current = false;
+              }, 1000);
+            }, 80);
+          }
+        } catch {
+          /* player détruit */
+        }
+      }, 120);
+    };
 
     const mount = async () => {
       const shell = shellRef.current;
@@ -73,6 +129,7 @@ export function HeroVideo({ youtubeId }: Props) {
       await loadYouTubeApi();
       if (cancelled || !window.YT?.Player || !shellRef.current) return;
 
+      clearLoopTimer();
       playerRef.current?.destroy();
       playerRef.current = null;
       shell.innerHTML = "";
@@ -82,6 +139,7 @@ export function HeroVideo({ youtubeId }: Props) {
       target.style.height = "100%";
       shell.appendChild(target);
 
+      // Pas de loop/playlist natif YouTube : c’est lui qui flash le bouton pause
       playerRef.current = new window.YT.Player(target, {
         videoId: youtubeId,
         width: "100%",
@@ -102,16 +160,17 @@ export function HeroVideo({ youtubeId }: Props) {
           onReady: (e) => {
             e.target.mute();
             e.target.playVideo();
+            startSoftLoop(e.target);
           },
           onStateChange: (e) => {
-            if (e.data === YT_ENDED) {
-              e.target.seekTo(0.01, true);
-              e.target.playVideo();
-              return;
-            }
-            if (e.data === YT_PAUSED) {
+            if (e.data === YT_PLAYING) {
               e.target.mute();
-              e.target.playVideo();
+              if (!restartingRef.current && !cancelled) {
+                // Premier frame joué : on retire le masque initial
+                window.setTimeout(() => {
+                  if (!cancelled && !restartingRef.current) setMask(false);
+                }, 250);
+              }
             }
           },
         },
@@ -122,6 +181,8 @@ export function HeroVideo({ youtubeId }: Props) {
 
     return () => {
       cancelled = true;
+      clearLoopTimer();
+      if (unmaskTimer != null) window.clearTimeout(unmaskTimer);
       playerRef.current?.destroy();
       playerRef.current = null;
       if (shellRef.current) shellRef.current.innerHTML = "";
@@ -129,15 +190,29 @@ export function HeroVideo({ youtubeId }: Props) {
   }, [youtubeId]);
 
   return (
-    <div className="absolute inset-0 overflow-hidden bg-muted" aria-hidden>
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-[1.55]">
+    <div className="absolute inset-0 overflow-hidden bg-ink" aria-hidden>
+      <div
+        className={`pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 scale-[1.65] transition-opacity duration-200 ${
+          mask ? "opacity-0" : "opacity-100"
+        }`}
+      >
         <div
           ref={shellRef}
           className="h-full w-full [&>iframe]:pointer-events-none [&>iframe]:h-full [&>iframe]:w-full"
         />
       </div>
-      {/* Filtre + bloque tous les clics (plus de boutons play/pause YouTube) */}
-      <div className="pointer-events-auto absolute inset-0 bg-black/30" />
+
+      {/* Fond ink pendant le masque (cache totalement l’UI YouTube) */}
+      <div
+        className={`pointer-events-none absolute inset-0 bg-ink transition-opacity duration-200 ${
+          mask ? "opacity-100" : "opacity-0"
+        }`}
+      />
+
+      {/* Filtre noir permanent + dégradés lisibilité */}
+      <div className="pointer-events-auto absolute inset-0 bg-black/55" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/25" />
     </div>
   );
 }

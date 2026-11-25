@@ -1,28 +1,49 @@
+import { site } from "./site";
+
 export const contact = {
   meta: {
-    title: "Contact | mbttaxis",
+    title: "Contacter MBT Taxis à Bruxelles",
     description:
-      "Contactez MBT Taxis — Rue des Béguines 160, 1080 Molenbeek-Saint-Jean · +32 2 426 45 53 · pmr@mbt.be",
+      "Téléphone, e-mail, adresse, horaires et formulaire de contact de MBT Taxis à Bruxelles.",
   },
-  title: "Contactez-nous",
+  hero: {
+    eyebrow: "Nous contacter",
+    title: "Une question ? Parlons-en simplement.",
+    text: "Réservation, accessibilité, devis d’adaptation ou information sur un véhicule : choisissez le canal qui vous convient.",
+    primaryCta: "Appeler la centrale",
+    primaryHref: site.phoneHref,
+    secondaryCta: "Envoyer un e-mail",
+    secondaryHref: `mailto:${site.email}`,
+  },
+  details: {
+    title: "Coordonnées",
+    address: site.address.full,
+    phone: site.phone,
+    phoneHref: site.phoneHref,
+    email: site.email,
+    mapCta: "Afficher l’adresse sur la carte",
+    mapHref:
+      "https://www.google.com/maps/search/?api=1&query=Rue+des+B%C3%A9guines+160+1080+Molenbeek-Saint-Jean",
+  },
+  hours: {
+    title: "Horaires",
+    value: "Du lundi au vendredi\nDe 8h à 17h",
+    valueLines: ["Du lundi au vendredi", "De 8h à 17h"],
+  },
   form: {
     title: "Formulaire de contact",
     intro:
-      "Vous avez une question, une demande de réservation ou souhaitez obtenir plus d'informations sur nos services ? L'équipe de MBT.sa est à votre écoute et se tient à votre disposition pour vous accompagner.",
-    submit: "Soumettre",
+      "Expliquez-nous votre demande. Notre équipe vous répondra dans les meilleurs délais pendant les heures d’ouverture.",
+    submit: "Envoyer mon message",
     successTitle: "Votre message a bien été envoyé.",
     successText: "Nous vous répondrons dans les meilleurs délais.",
-  },
-  details: {
-    title: "Nos coordonnées",
-    address: "Rue des Béguines 160, 1080 Molenbeek-Saint-Jean",
-    phone: "+32 2 426 45 53",
-    phoneHref: "tel:+3224264553",
-    email: "pmr@mbt.be",
-  },
-  hours: {
-    title: "Nos horaires",
-    text: "Nous sommes disponibles :",
-    value: "Du lundi au vendredi de 8:00 à 17:00",
+    subjects: [
+      "Réservation de taxi",
+      "Transport PMR ou VSL",
+      "Adaptation d’un véhicule",
+      "Location ou vente",
+      "Handycab",
+      "Autre question",
+    ],
   },
 } as const;

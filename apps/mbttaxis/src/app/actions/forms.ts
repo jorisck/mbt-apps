@@ -17,15 +17,31 @@ export async function submitReservation(
   formData: FormData,
 ): Promise<FormState> {
   const parsed = reservationSchema.safeParse({
+    service: formData.get("service"),
     name: formData.get("name"),
     phone: formData.get("phone"),
     email: formData.get("email"),
-    tripAt: formData.get("tripAt"),
-    bookingTime: formData.get("bookingTime") || undefined,
-    pickup: formData.get("pickup"),
-    dropoff: formData.get("dropoff"),
-    wheelchair: formData.get("wheelchair"),
     notes: formData.get("notes") || undefined,
+    consent: formData.get("consent"),
+    tripDate: formData.get("tripDate") || undefined,
+    tripTime: formData.get("tripTime") || undefined,
+    pickup: formData.get("pickup") || undefined,
+    dropoff: formData.get("dropoff") || undefined,
+    passengers: formData.get("passengers") || undefined,
+    tripType: formData.get("tripType") || undefined,
+    wheelchair: formData.get("wheelchair") || undefined,
+    companion: formData.get("companion") || undefined,
+    vehicleBrand: formData.get("vehicleBrand") || undefined,
+    vehicleModel: formData.get("vehicleModel") || undefined,
+    vehicleYear: formData.get("vehicleYear") || undefined,
+    adaptationType: formData.get("adaptationType") || undefined,
+    wheelchairType: formData.get("wheelchairType") || undefined,
+    desiredDate: formData.get("desiredDate") || undefined,
+    searchType: formData.get("searchType") || undefined,
+    vehicleWish: formData.get("vehicleWish") || undefined,
+    pmrVehicle: formData.get("pmrVehicle") || undefined,
+    budget: formData.get("budget") || undefined,
+    delay: formData.get("delay") || undefined,
   });
 
   if (!parsed.success) {
@@ -65,12 +81,12 @@ export async function submitContact(
   formData: FormData,
 ): Promise<FormState> {
   const parsed = contactSchema.safeParse({
-    firstName: formData.get("firstName"),
-    lastName: formData.get("lastName"),
+    name: formData.get("name"),
     email: formData.get("email"),
     phone: formData.get("phone") || undefined,
     subject: formData.get("subject"),
     message: formData.get("message"),
+    consent: formData.get("consent"),
   });
 
   if (!parsed.success) {

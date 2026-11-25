@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { site } from "../../content/site";
+import { footer, site } from "../../content/site";
 import { Icon } from "./Icon";
 
 export function Footer() {
@@ -12,129 +12,121 @@ export function Footer() {
             <Link href="/" className="inline-flex w-fit items-center gap-3">
               <Image
                 src="/logo.png"
-                alt="HandyCab"
+                alt="Handycab"
                 width={44}
                 height={44}
                 className="h-11 w-11 rounded-xl object-contain"
               />
               <span className="font-display text-[20px] font-bold text-brand-dark">
-                HandyCab
+                {footer.brand.title}
               </span>
             </Link>
             <p className="max-w-sm text-[14px] leading-relaxed text-slate-600">
-              Division spécialisée de{" "}
-              <strong className="text-brand-dark">MBT Taxis SRL</strong>.
-              Transport conventionné de personnes à mobilité réduite en Région
-              de Bruxelles-Capitale. Agréé auprès des mutuelles et du SPF
-              Mobilité.
+              <strong className="text-brand-dark">{site.tagline}</strong>
+              <br />
+              {footer.brand.body}
             </p>
-            <div className="flex items-center gap-2 pt-2">
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              <a
+                href={site.parent.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full border border-brand-border bg-white px-3 py-1 text-[11px] font-semibold text-slate-700 transition-colors hover:border-brand-accent hover:text-brand-dark"
+              >
+                {site.parent.label}{" "}
+                <strong className="text-brand-accent">{site.parent.name}</strong>
+                <span className="text-brand-accent">↗</span>
+              </a>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-border bg-white px-3 py-1 text-[11px] font-semibold text-slate-700">
                 <Icon name="verified" className="text-[13px] text-brand-accent" />
-                Agrément TX-PMR Région Bruxelles
+                Taxis autorisés Région Bruxelles-Capitale
               </span>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-brand-dark">
-              Services PMR
-            </span>
-            <ul className="space-y-2 text-[13px] text-slate-600">
-              <li>
-                <a className="hover:text-brand-dark" href="#flotte">
-                  Vans 100 % électriques
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-brand-dark" href="#calculateur">
-                  Transport fauteuil manuel
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-brand-dark" href="#calculateur">
-                  Fauteuil électrique lourd
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-brand-dark" href="#contact">
-                  Séries de soins & dialyse
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-brand-dark">
-              Institution & réseau
-            </span>
-            <ul className="space-y-2 text-[13px] text-slate-600">
-              <li>
-                <a
-                  className="font-semibold text-brand-accent hover:text-brand-accent"
-                  href={site.parent.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Portail MBT Taxis ↗
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-brand-dark" href="#contact">
-                  Agréments mutuelles
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-brand-dark" href="#contact">
-                  Conventions hôpitaux
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-brand-dark" href="#chauffeurs">
-                  Charte d’accompagnement
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-brand-dark">
-              Permanence 24/7
-            </span>
-            <div className="flex flex-col gap-1 rounded-xl border border-brand-border bg-white p-4">
-              <span className="text-[11px] font-medium text-slate-500">
-                Ligne directe dispatch :
+          {footer.columns.map((col) => (
+            <div key={col.title} className="flex flex-col gap-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-dark">
+                {col.title}
               </span>
-              <a
-                className="text-[16px] font-bold text-brand-dark transition-colors hover:text-brand-accent"
-                href={site.phoneHref}
-              >
-                {site.phone}
-              </a>
-              <span className="pt-1 text-[11px] text-slate-500">
-                {site.address.street}, {site.address.postalCode}{" "}
-                {site.address.city}
-              </span>
+              <ul className="space-y-2 text-[13px] text-slate-600">
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    {"external" in link && link.external ? (
+                      <a
+                        className="hover:text-brand-dark"
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link className="hover:text-brand-dark" href={link.href}>
+                        {link.label}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
+          ))}
+        </div>
+
+        <div className="mt-8 flex flex-col justify-between gap-6 rounded-2xl border border-brand-border bg-white p-5 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-[12px] font-bold uppercase tracking-wider text-slate-500">
+              Coordonnées
+            </p>
+            <a
+              href={site.phoneHref}
+              className="mt-1 block text-[18px] font-bold text-brand-dark hover:text-brand-accent"
+            >
+              {site.phoneDisplay}
+            </a>
+            <a
+              href={`mailto:${site.email}`}
+              className="text-[13px] text-slate-600 hover:text-brand-dark"
+            >
+              {site.email}
+            </a>
+            <p className="mt-1 text-[13px] text-slate-500">
+              {site.address.street}, {site.address.postalCode}{" "}
+              {site.address.city}
+            </p>
           </div>
+          <a
+            href={site.bookingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-yellow px-6 py-3 text-[13px] font-bold text-brand-charcoal transition-all hover:-translate-y-0.5 hover:bg-brand-yellow-dark"
+          >
+            Réserver un taxi adapté
+            <Icon name="arrow" />
+          </a>
         </div>
 
         <div className="flex flex-col items-center justify-between gap-4 pt-8 text-[12px] text-slate-500 sm:flex-row">
           <div>
-            © 2026 HandyCab Bruxelles. Une marque exploitée par MBT Taxis SRL.
-            Tous droits réservés.
+            © 2026 Handycab. Un service proposé par {site.parent.name}. Tous
+            droits réservés.
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-4">
             <Link className="hover:text-brand-dark" href="/mentions-legales">
               Mentions légales
             </Link>
             <span>•</span>
             <Link className="hover:text-brand-dark" href="/cookie-policy">
-              Protection des données (RGPD)
+              Cookies et confidentialité
             </Link>
             <span>•</span>
-            <a className="hover:text-brand-dark" href="#application">
-              Charte d’accessibilité
+            <a
+              className="hover:text-brand-dark"
+              href={site.conditionsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Conditions générales
             </a>
           </div>
         </div>

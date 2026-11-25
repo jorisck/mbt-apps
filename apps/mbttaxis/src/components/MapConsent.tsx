@@ -20,7 +20,7 @@ export function MapConsent() {
   if (!allowed) {
     return (
       <div className="flex min-h-[280px] items-center justify-center rounded-2xl bg-[#d6e6f7] p-6 text-center text-brand">
-        {reservation.zones.mapBlocked}
+        {reservation.pmrPage.zones.mapBlocked}
       </div>
     );
   }

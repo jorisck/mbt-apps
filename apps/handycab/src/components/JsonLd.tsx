@@ -5,11 +5,12 @@ export function JsonLd() {
     "@context": "https://schema.org",
     "@type": ["TaxiService", "LocalBusiness"],
     name: site.name,
+    description: site.tagline,
     url: site.url,
     logo: `${site.url}/logo.png`,
     image: `${site.url}/og-image.png`,
     email: site.email,
-    telephone: site.phone,
+    telephone: site.phoneDisplay,
     parentOrganization: {
       "@type": "Organization",
       name: site.parent.name,
@@ -23,6 +24,7 @@ export function JsonLd() {
       addressCountry: site.address.country,
     },
     areaServed: "Bruxelles",
+    sameAs: [site.playStoreUrl, site.appStoreUrl],
   };
 
   return (

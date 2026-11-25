@@ -21,6 +21,12 @@ export default function TarifsPage() {
                 {p}
               </p>
             ))}
+            <h2 className="mt-8 text-xl text-brand">{tarifs.destinations.title}</h2>
+            <ul className="mt-3 list-disc space-y-1 pl-6 text-body">
+              {tarifs.destinations.items.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
             <Link href={tarifs.hero.ctaHref} className="btn btn-secondary mt-6">
               {tarifs.hero.cta}
             </Link>

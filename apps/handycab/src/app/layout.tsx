@@ -23,13 +23,13 @@ const raleway = Raleway({
 });
 
 const description =
-  "Transport conventionné pour personnes à mobilité réduite à Bruxelles. Flotte électrique TPMR, chauffeurs secouristes, dispatch 24/7. Un service de MBT Taxis.";
+  "Commandez immédiatement ou planifiez un taxi adapté PMR à Bruxelles avec Handycab. Réservation sur le web, l’application mobile ou par téléphone.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: "HandyCab • Transport PMR & mobilité adaptée à Bruxelles",
-    template: "%s | HandyCab",
+    default: "Handycab — Réserver un taxi PMR à Bruxelles",
+    template: "%s | Handycab",
   },
   description,
   applicationName: site.name,
@@ -47,20 +47,20 @@ export const metadata: Metadata = {
     locale: "fr_BE",
     url: site.url,
     siteName: site.name,
-    title: "HandyCab — Transport PMR à Bruxelles",
+    title: "Handycab — Réserver un taxi PMR à Bruxelles",
     description,
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "HandyCab — Transport PMR & mobilité adaptée à Bruxelles",
+        alt: "Handycab — Taxi PMR à Bruxelles",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "HandyCab — Transport PMR à Bruxelles",
+    title: "Handycab — Réserver un taxi PMR à Bruxelles",
     description,
     images: ["/og-image.png"],
   },
@@ -74,9 +74,15 @@ export default function RootLayout({
   return (
     <html lang="fr-BE" className={`${poppins.variable} ${raleway.variable}`}>
       <body className="min-h-screen antialiased bg-white text-brand-dark">
+        <a
+          href="#contenu"
+          className="absolute left-4 top-4 z-[100] -translate-y-[200%] rounded-full bg-brand-yellow px-4 py-2 text-sm font-bold text-brand-charcoal transition-transform focus:translate-y-0"
+        >
+          Aller au contenu
+        </a>
         <JsonLd />
         <Header />
-        <main>{children}</main>
+        <main id="contenu">{children}</main>
         <Footer />
       </body>
     </html>

@@ -4,11 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { contactCta, navLinks } from "../../content/nav";
+import {
+  callCta,
+  navLinks,
+  reserveCta,
+  serviceLinks,
+} from "../../content/nav";
 
 export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
@@ -24,7 +30,11 @@ export function Header() {
 
   useEffect(() => {
     setOpen(false);
+    setServicesOpen(false);
   }, [pathname]);
+
+  const isServicesActive =
+    pathname === "/services" || pathname.startsWith("/services/");
 
   return (
     <header
@@ -50,6 +60,46 @@ export function Header() {
             aria-label="Principal"
           >
             {navLinks.map((link) => {
+              if ("children" in link && link.children) {
+                return (
+                  <div
+                    key={link.href}
+                    className="relative"
+                    onMouseEnter={() => setServicesOpen(true)}
+                    onMouseLeave={() => setServicesOpen(false)}
+                  >
+                    <Link
+                      href={link.href}
+                      className={`whitespace-nowrap rounded-full px-2.5 py-2 text-sm leading-none transition-colors xl:px-3 ${
+                        isServicesActive
+                          ? "bg-brand text-white"
+                          : "text-body hover:text-brand"
+                      }`}
+                      aria-expanded={servicesOpen}
+                      aria-haspopup="true"
+                    >
+                      {link.label}
+                      <i className="fa fa-angle-down ml-1 text-xs" aria-hidden />
+                    </Link>
+                    {servicesOpen ? (
+                      <div className="absolute left-0 top-full z-50 min-w-[14rem] pt-2">
+                        <div className="rounded-2xl border border-border bg-white p-2 shadow-sm">
+                          {link.children.map((child) => (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              className="block rounded-xl px-3 py-2.5 text-sm text-body hover:bg-soft hover:text-brand"
+                            >
+                              {child.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              }
+
               const active = pathname === link.href;
               return (
                 <Link
@@ -65,11 +115,17 @@ export function Header() {
                 </Link>
               );
             })}
-            <Link
-              href={contactCta.href}
-              className="btn btn-primary ml-2 whitespace-nowrap shrink-0"
+            <a
+              href={callCta.href}
+              className="btn btn-secondary ml-2 whitespace-nowrap shrink-0 !px-4 !py-2 text-sm"
             >
-              {contactCta.label}
+              {callCta.label}
+            </a>
+            <Link
+              href={reserveCta.href}
+              className="btn btn-primary whitespace-nowrap shrink-0 !px-4 !py-2 text-sm"
+            >
+              {reserveCta.label}
             </Link>
           </nav>
 
@@ -88,10 +144,35 @@ export function Header() {
         {open ? (
           <div
             id="mobile-menu"
-            className="mt-2 rounded-[1.5rem] border border-border bg-white p-4 shadow-sm lg:hidden"
+            className="mt-2 max-h-[80vh] overflow-y-auto rounded-[1.5rem] border border-border bg-white p-4 shadow-sm lg:hidden"
           >
             <nav className="flex flex-col gap-1" aria-label="Mobile">
               {navLinks.map((link) => {
+                if ("children" in link && link.children) {
+                  return (
+                    <div key={link.href} className="pt-1">
+                      <Link
+                        href={link.href}
+                        className={`block rounded-full px-4 py-3 font-medium ${
+                          isServicesActive ? "bg-brand text-white" : "text-body"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                      <div className="ml-2 mt-1 flex flex-col gap-0.5 border-l border-border pl-3">
+                        {link.children.map((child) => (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            className="rounded-full px-3 py-2 text-sm text-body"
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
                 const active = pathname === link.href;
                 return (
                   <Link
@@ -105,8 +186,11 @@ export function Header() {
                   </Link>
                 );
               })}
-              <Link href={contactCta.href} className="btn btn-primary mt-2 w-full">
-                {contactCta.label}
+              <a href={callCta.href} className="btn btn-secondary mt-2 w-full">
+                {callCta.labelFull}
+              </a>
+              <Link href={reserveCta.href} className="btn btn-primary w-full">
+                {reserveCta.label}
               </Link>
             </nav>
           </div>

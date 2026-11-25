@@ -206,10 +206,11 @@ h5 {
 
 .hero-lead {
   font-family: var(--font-raleway), sans-serif !important;
-  font-weight: 400;
+  font-weight: 700;
   font-size: clamp(1.05rem, 1rem + 0.35vw, 1.25rem);
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.95) !important;
+  line-height: 1.55;
+  color: #ffffff !important;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.45);
 }
 
 /* Titres / texte sur fond bleu ou sombre */

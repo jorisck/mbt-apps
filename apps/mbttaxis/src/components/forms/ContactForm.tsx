@@ -21,31 +21,33 @@ export function ContactForm() {
   return (
     <form action={action} className="space-y-3">
       <div className="form-field">
-        <label htmlFor="lastName">Nom *</label>
-        <input id="lastName" name="lastName" required />
-        {state.errors?.lastName?.[0] ? (
-          <p className="form-error">{state.errors.lastName[0]}</p>
+        <label htmlFor="name">Nom et prénom *</label>
+        <input id="name" name="name" required />
+        {state.errors?.name?.[0] ? (
+          <p className="form-error">{state.errors.name[0]}</p>
         ) : null}
       </div>
       <div className="form-field">
-        <label htmlFor="firstName">Prénom *</label>
-        <input id="firstName" name="firstName" required />
-        {state.errors?.firstName?.[0] ? (
-          <p className="form-error">{state.errors.firstName[0]}</p>
-        ) : null}
+        <label htmlFor="phone">Numéro de téléphone</label>
+        <input id="phone" name="phone" type="tel" />
       </div>
       <div className="form-field">
-        <label htmlFor="email">E-mail *</label>
+        <label htmlFor="email">Adresse e-mail *</label>
         <input id="email" name="email" type="email" required />
         {state.errors?.email?.[0] ? <p className="form-error">{state.errors.email[0]}</p> : null}
       </div>
       <div className="form-field">
-        <label htmlFor="phone">Téléphone</label>
-        <input id="phone" name="phone" type="tel" />
-      </div>
-      <div className="form-field">
         <label htmlFor="subject">Objet de la demande *</label>
-        <input id="subject" name="subject" required />
+        <select id="subject" name="subject" required defaultValue="">
+          <option value="" disabled>
+            Choisir un objet
+          </option>
+          {contact.form.subjects.map((subject) => (
+            <option key={subject} value={subject}>
+              {subject}
+            </option>
+          ))}
+        </select>
         {state.errors?.subject?.[0] ? (
           <p className="form-error">{state.errors.subject[0]}</p>
         ) : null}
@@ -55,6 +57,17 @@ export function ContactForm() {
         <textarea id="message" name="message" required />
         {state.errors?.message?.[0] ? (
           <p className="form-error">{state.errors.message[0]}</p>
+        ) : null}
+      </div>
+      <div className="form-field">
+        <label className="flex items-start gap-3 !normal-case">
+          <input type="checkbox" name="consent" value="on" required className="mt-1" />
+          <span>
+            J’accepte que MBT utilise ces informations pour traiter ma demande.
+          </span>
+        </label>
+        {state.errors?.consent?.[0] ? (
+          <p className="form-error">{state.errors.consent[0]}</p>
         ) : null}
       </div>
       <button type="submit" className="btn btn-primary" disabled={pending}>

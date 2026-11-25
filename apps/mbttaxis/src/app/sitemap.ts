@@ -4,6 +4,16 @@ import { site } from "../../content/site";
 export default function sitemap(): MetadataRoute.Sitemap {
   const paths = [
     "/",
+    "/services",
+    "/services/entreprises",
+    "/services/quotidien",
+    "/services/vsl",
+    "/services/pmr",
+    "/services/adaptation",
+    "/services/location-vente",
+    "/handycab",
+    "/centrale",
+    "/reservation",
     "/reservation-tpmr",
     "/tarifs-vsl",
     "/adaptation-tpmr",

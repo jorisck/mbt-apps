@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { about } from "../../../content/about";
 import { ImagePlaceholder } from "../../components/ImagePlaceholder";
 import { Reveal, RevealItem, RevealStagger } from "../../components/Reveal";
@@ -18,10 +19,21 @@ export default function AboutPage() {
   return (
     <>
       <section className="bg-soft pt-36 pb-16">
-        <div className="container-mbt">
+        <div className="container-mbt max-w-4xl">
           <Reveal direction="left">
-            <p className="font-medium text-brand">{about.hero.eyebrow}</p>
+            <p className="font-medium tracking-[0.08em] text-brand uppercase">
+              {about.hero.eyebrow}
+            </p>
             <h1 className="mt-2 max-w-3xl text-ink">{about.hero.title}</h1>
+            <p className="mt-4 max-w-2xl text-body">{about.hero.text}</p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link href={about.hero.primaryHref} className="btn btn-primary">
+                {about.hero.primaryCta}
+              </Link>
+              <Link href={about.hero.secondaryHref} className="btn btn-secondary">
+                {about.hero.secondaryCta}
+              </Link>
+            </div>
           </Reveal>
         </div>
       </section>
@@ -42,46 +54,32 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="bg-white pb-16">
+      <section className="bg-white pb-8">
         <div className="container-mbt">
           <Reveal direction="up">
-            <h2 className="text-brand">{about.innovate.title}</h2>
-            {about.innovate.paragraphs.map((p) => (
-              <p key={p.slice(0, 40)} className="mt-4 max-w-4xl text-body">
-                {p}
-              </p>
-            ))}
+            <h2 className="text-brand">{about.timeline.title}</h2>
           </Reveal>
-        </div>
-      </section>
-
-      <section className="bg-brand py-16 text-white">
-        <div className="container-mbt">
-          <Reveal direction="left">
-            {about.innovate.banner.map((p) => (
-              <p key={p.slice(0, 40)} className="mt-4 max-w-4xl text-white/90 first:mt-0">
-                {p}
-              </p>
+          <div className="mt-10 space-y-6">
+            {about.timeline.items.map((item, i) => (
+              <Reveal key={item.year} direction={i % 2 === 0 ? "left" : "right"}>
+                <article className="grid gap-4 rounded-2xl border border-border p-6 md:grid-cols-[8rem_1fr] md:items-start">
+                  <p className="font-[family-name:var(--font-poppins)] text-2xl font-bold text-brand">
+                    {item.year}
+                  </p>
+                  <div>
+                    <h3 className="text-xl text-ink">{item.title}</h3>
+                    <p className="mt-2 text-body">{item.text}</p>
+                  </div>
+                </article>
+              </Reveal>
             ))}
-          </Reveal>
+          </div>
         </div>
       </section>
 
       <section className="bg-white py-16">
         <div className="container-mbt">
-          <Reveal direction="up">
-            <h2 className="text-brand">{about.poles.title}</h2>
-            <p className="mt-2 text-xl text-ink">{about.poles.subtitle}</p>
-            <p className="mt-6 max-w-4xl text-body">{about.poles.intro}</p>
-            <ul className="mt-6 list-disc space-y-2 pl-6 text-body">
-              {about.poles.items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </Reveal>
-
-          {/* Original : grande photo à gauche + 4 tuiles colorées (2×2) */}
-          <div className="mt-12 grid items-stretch gap-4 lg:grid-cols-2 lg:gap-6">
+          <div className="mt-4 grid items-stretch gap-4 lg:grid-cols-2 lg:gap-6">
             <Reveal direction="left" className="h-full min-h-[22rem]">
               <ImagePlaceholder
                 label="Mobilité PMR"
@@ -106,6 +104,24 @@ export default function AboutPage() {
               ))}
             </RevealStagger>
           </div>
+        </div>
+      </section>
+
+      <section className="bg-brand py-16 text-white">
+        <div className="container-mbt text-center">
+          <Reveal direction="up">
+            <h2 className="heading-on-brand mx-auto max-w-3xl">
+              {about.finalCta.title}
+            </h2>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href={about.finalCta.primaryHref} className="btn btn-outline-light">
+                {about.finalCta.primaryCta}
+              </Link>
+              <Link href={about.finalCta.secondaryHref} className="btn btn-outline-light">
+                {about.finalCta.secondaryCta}
+              </Link>
+            </div>
+          </Reveal>
         </div>
       </section>
     </>

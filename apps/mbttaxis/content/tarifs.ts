@@ -1,23 +1,33 @@
 export const tarifs = {
   meta: {
-    title: "Tarifs VSL | mbttaxis",
+    title: "Transport VSL — Tarifs et organisation | MBT Taxis",
     description:
-      "Grille tarifaire 2026 du transport médico-sanitaire MBT Taxis (arrêté 2013/1654), TVAC.",
+      "Transport médico-sanitaire assis agréé (n° 30.01.16). Organisez un VSL vers hôpitaux, consultations et centres de soins. Grille tarifaire 2026.",
   },
   hero: {
-    title: "Transport médico-sanitaire",
+    title: "Un transport médico-sanitaire sûr et rassurant.",
     paragraphs: [
-      "Notre service de transport médico-sanitaire est certifié TPMR et agréé. Nous assurons des déplacements médicaux non urgents dans le respect des normes en vigueur, avec des véhicules adaptés et un accompagnement sécurisé.",
-      "Nos chauffeurs, formés et expérimentés, veillent au confort et à la sécurité de chaque patient, pour des trajets sereins vers les centres de soins, hôpitaux et consultations.",
+      "Notre service VSL assure le transport assis de patients qui doivent se rendre à un rendez-vous médical non urgent, sans nécessiter une surveillance médicale intensive pendant le trajet.",
+      "Nos chauffeurs veillent au confort, à la sécurité et à la ponctualité de chaque passager. MBT dispose d’un agrément de transport médico-sanitaire n° 30.01.16.",
     ],
-    cta: "Voir les tarifs",
-    ctaHref: "#grille-tarifaire",
+    cta: "Organiser un transport VSL",
+    ctaHref: "/reservation?service=vsl",
+  },
+  destinations: {
+    title: "Destinations habituelles",
+    items: [
+      "hôpitaux ;",
+      "consultations médicales ;",
+      "centres de soins ;",
+      "séances de rééducation ;",
+      "établissements spécialisés.",
+    ],
   },
   grid: {
     id: "grille-tarifaire",
     title: "Notre grille tarifaire",
     intro: [
-      "Depuis le 1er mai 2024, les tarifs en matière de transport médico-sanitaire ont été fixés. Une indexation de ces tarifs doit être réalisée début janvier de chaque année selon l'indice santé.",
+      "Depuis le 1er mai 2024, les tarifs en matière de transport médico-sanitaire ont été fixés. Une indexation de ces tarifs doit être réalisée début janvier de chaque année selon l’indice santé.",
       "Les tarifs indexés pour 2026 sont les suivants (arrêté 2013/1654) :",
     ],
     vehicle: {
@@ -26,8 +36,8 @@ export const tarifs = {
       priceNote: "/ tarif de base",
       description:
         "Tarifs applicables aux véhicules sanitaires légers pour le transport assis de patients ne nécessitant pas de surveillance intensive.",
-      cta: "Réserver ce véhicule",
-      ctaHref: "/reservation-tpmr",
+      cta: "Organiser un transport VSL",
+      ctaHref: "/reservation?service=vsl",
     },
     lines: [
       { label: "Km supplémentaire entre 11 et 30 km", value: "2,11 € / km" },

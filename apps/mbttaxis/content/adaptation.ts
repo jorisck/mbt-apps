@@ -1,28 +1,28 @@
 export const adaptation = {
   meta: {
-    title: "Adaptation TPMR | mbttaxis",
+    title: "Adaptation PMR — Rendez votre véhicule accessible | MBT",
     description:
-      "MBT Adaptation transforme des véhicules classiques en véhicules accessibles en fauteuil roulant.",
+      "MBT transforme des véhicules classiques pour permettre l’accès et le transport d’une personne en fauteuil roulant.",
   },
   hero: {
-    title: "Adaptation TPMR",
+    title: "Rendez votre véhicule accessible.",
     paragraphs: [
-      "MBT Adaptation transforme des véhicules classiques en véhicules accessibles en fauteuil roulant.",
-      "Grâce à l'adaptation du plancher, l'accès au véhicule est facilité et permet à l'utilisateur de voyager confortablement et en toute autonomie.",
+      "MBT transforme des véhicules classiques afin de permettre l’accès et le transport d’une personne en fauteuil roulant.",
+      "Chaque projet tient compte du véhicule, du fauteuil, de la fréquence d’utilisation et des besoins de la personne transportée.",
     ],
-    cta: "Demander un devis",
-    ctaHref: "#devis-personnalise",
+    cta: "Demander un devis d’adaptation",
+    ctaHref: "/reservation?service=adaptation",
   },
   expertise: {
-    title: "L'expertise au service de votre mobilité",
+    title: "L’expertise au service de votre mobilité",
     cards: [
       {
-        title: "L'adaptation, au-delà du transport",
-        text: "Pour nous, l'adaptation d'un véhicule ne se limite pas à un simple aménagement technique. C'est un service complet, pensé pour améliorer votre quotidien. Chaque projet est conçu avec une attention particulière à la qualité, au confort et à la sécurité, afin de vous offrir une expérience de mobilité sereine et adaptée à vos besoins. Notre objectif est simple : vous permettre de vous déplacer en toute autonomie, avec liberté et tranquillité, quel que soit votre trajet.",
+        title: "L’adaptation, au-delà de l’équipement",
+        text: "L’adaptation ne se limite pas à l’installation d’un équipement. Notre équipe analyse votre demande et vous propose une solution compatible, fiable et durable, conçue pour améliorer le quotidien.",
       },
       {
         title: "Des adaptations fiables et sécurisées",
-        text: "La plupart des véhicules peuvent être adaptés, mais chaque modèle nécessite une solution spécifique. Nous analysons soigneusement votre véhicule et vos besoins afin de proposer une adaptation parfaitement compatible, fiable et durable. Toutes nos transformations sont réalisées dans un souci constant de sécurité, pour garantir un véhicule stable, confortable et conforme à la réglementation.",
+        text: "Abaissement du plancher, rampe d’accès, aménagement intérieur, sécurisation du fauteuil et accompagnement dans les démarches techniques et d’homologation : chaque transformation est réalisée dans un souci constant de sécurité.",
       },
     ],
   },
@@ -30,30 +30,29 @@ export const adaptation = {
     id: "devis-personnalise",
     title: "Devis personnalisé",
     intro:
-      "Parlez-nous de votre projet d'adaptation TPMR. Notre équipe vous accompagne et vous propose une solution sur mesure.",
-    submit: "Soumettre",
+      "Parlez-nous de votre projet d’adaptation PMR. Notre équipe vous accompagne et vous propose une solution sur mesure.",
+    submit: "Demander mon devis d’adaptation",
     successTitle: "Votre demande de devis a été enregistrée.",
-    successText:
-      "Nous vous recontacterons dans les plus brefs délais.",
+    successText: "Nous vous recontacterons dans les plus brefs délais.",
   },
   commitments: {
     title: "Nos engagements",
     intro:
-      "Depuis plus de 25 ans, nous mettons notre expertise au service de votre mobilité, avec un accompagnement complet et des garanties fiables.",
+      "Depuis 2016, l’adaptation de véhicules est un métier interne chez MBT, au service d’une mobilité plus accessible.",
     items: [
       {
-        title: "Plus de 25 ans d'expérience",
-        text: "Des performances et une disponibilité continues garantissent un service efficace et fiable avec un minimum d'interruptions et des temps de réponse rapides.",
+        title: "Expertise internalisée",
+        text: "Formation spécialisée auprès de Tripod Mobility et transformations réalisées par notre équipe pour un suivi cohérent du projet.",
         icon: "trophy",
       },
       {
-        title: "Entretien & service après-vente",
-        text: "La rapidité et l'efficacité garantissent l'exécution rapide des tâches et l'utilisation optimale des ressources, ce qui améliore la productivité et la satisfaction.",
+        title: "Entretien & suivi",
+        text: "Un accompagnement technique pour des adaptations durables, fiables et adaptées à l’usage réel du véhicule.",
         icon: "wrench",
       },
       {
-        title: "Homologation & garantie",
-        text: "La capacité de croissance est l'aptitude d'un système à évoluer et à s'adapter, en répondant à des demandes croissantes et à des besoins en constante évolution pour une réussite à long terme.",
+        title: "Homologation & conformité",
+        text: "Accompagnement dans les démarches techniques et d’homologation pour un véhicule conforme et sécurisé.",
         icon: "shield",
       },
     ],
