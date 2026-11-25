@@ -7,7 +7,7 @@ export const site = {
   phoneShort: "02 426 45 53",
   phoneHref: "tel:+3224264553",
   handycabUrl:
-    process.env.NEXT_PUBLIC_HANDYCAB_URL ?? "https://www.handycab.be",
+    process.env.NEXT_PUBLIC_HANDYCAB_URL ?? "https://handycab.vercel.app/application",
   handycabPhone: "+32 (0)2 315 31 00",
   handycabPhoneShort: "02 315 31 00",
   handycabPhoneHref: "tel:+3223153100",

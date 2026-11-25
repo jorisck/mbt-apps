@@ -11,7 +11,7 @@ export const handycab = {
     title: "Handycab. Le taxi adapté en quelques gestes.",
     text: "Une plateforme bruxelloise entièrement consacrée à la mobilité des personnes à mobilité réduite. Commandez immédiatement un taxi adapté, ou planifiez votre trajet depuis l’application et la plateforme web.",
     primaryCta: "Réserver avec Handycab",
-    primaryHref: site.handycabBooking,
+    primaryHref: site.handycabUrl,
     secondaryCta: `Appeler le ${site.handycabPhoneShort}`,
     secondaryHref: site.handycabPhoneHref,
   },
@@ -27,7 +27,7 @@ export const handycab = {
       "Ligne téléphonique dédiée pour être accompagné.",
     ],
     cta: "Ouvrir la réservation Handycab",
-    href: site.handycabBooking,
+    href: site.handycabUrl,
   },
   steps: {
     title: "Réserver en trois étapes",
@@ -77,13 +77,13 @@ export const handycab = {
       title: "Application Android",
       text: "Téléchargez gratuitement Handycab depuis Google Play et réservez un taxi adapté depuis votre téléphone.",
       cta: "Télécharger sur Google Play",
-      href: site.handycabPlay,
+      href: site.handycabUrl,
     },
     ios: {
       title: "Application iPhone et iPad",
       text: "Retrouvez Handycab sur l’App Store pour commander ou planifier un trajet adapté.",
       cta: "Télécharger sur l’App Store",
-      href: site.handycabAppStore,
+      href: site.handycabUrl,
     },
   },
   help: {
