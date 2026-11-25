@@ -1,0 +1,19 @@
+{
+  "name": "mbt",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "dev:mbttaxis": "turbo run dev --filter=mbttaxis",
+    "dev:handycab": "turbo run dev --filter=handycab"
+  },
+  "devDependencies": {
+    "turbo": "^2.11.13",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.2.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

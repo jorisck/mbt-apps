@@ -1,0 +1,289 @@
+@import "tailwindcss";
+@import "font-awesome/css/font-awesome.min.css";
+
+:root {
+  --color-brand: #1560bd;
+  --color-brand-hover: #1252a1;
+  --color-brand-active: #114d97;
+  --color-brand-hero-btn: #10498f;
+  --color-ink: #010102;
+  --color-muted: #e6e6e6;
+  --color-white: #ffffff;
+  --color-link-dark: #0d3b74;
+  --color-link-light: #64a1ee;
+  --color-body: #212529;
+  --color-border: #dee2e6;
+  --color-soft: #f8f9fa;
+  --radius-pill: 30px;
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+@theme inline {
+  --color-brand: var(--color-brand);
+  --color-brand-hover: var(--color-brand-hover);
+  --color-brand-active: var(--color-brand-active);
+  --color-brand-hero-btn: var(--color-brand-hero-btn);
+  --color-ink: var(--color-ink);
+  --color-muted: var(--color-muted);
+  --color-link-dark: var(--color-link-dark);
+  --color-link-light: var(--color-link-light);
+  --color-body: var(--color-body);
+  --color-border: var(--color-border);
+  --color-soft: var(--color-soft);
+  --font-sans: var(--font-raleway);
+  --font-display: var(--font-poppins);
+  --breakpoint-sm: 36rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 62rem;
+  --breakpoint-xl: 75rem;
+  --breakpoint-2xl: 87.5rem;
+  --container-sm: 33.75rem;
+  --container-md: 45rem;
+  --container-lg: 60rem;
+  --container-xl: 71.25rem;
+  --container-2xl: 82.5rem;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-white);
+  color: #000;
+  font-family: var(--font-raleway), sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  /* Pas de color forcée : sinon text-white / text-brand sont écrasés */
+}
+
+h1 {
+  font-size: clamp(2rem, 1.5rem + 2vw, 3rem);
+}
+h2 {
+  font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.5rem);
+}
+h3 {
+  font-size: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+}
+h4 {
+  font-size: 1.5rem;
+}
+h5 {
+  font-size: 1.25rem;
+}
+
+.container-mbt {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  max-width: 82.5rem;
+}
+
+@media (min-width: 36rem) {
+  .container-mbt {
+    max-width: 33.75rem;
+  }
+}
+@media (min-width: 48rem) {
+  .container-mbt {
+    max-width: 45rem;
+  }
+}
+@media (min-width: 62rem) {
+  .container-mbt {
+    max-width: 60rem;
+  }
+}
+@media (min-width: 75rem) {
+  .container-mbt {
+    max-width: 71.25rem;
+  }
+}
+@media (min-width: 87.5rem) {
+  .container-mbt {
+    max-width: 82.5rem;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-pill);
+  padding: 0.65rem 1.5rem;
+  font-family: var(--font-raleway), sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--color-brand);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--color-brand-hover);
+}
+
+.btn-secondary {
+  background: var(--color-ink);
+  color: #fff;
+}
+.btn-secondary:hover {
+  background: #1a1a1c;
+}
+
+.btn-hero {
+  background: var(--color-brand-hero-btn);
+  color: #fff;
+  font-size: 1.25rem;
+  padding: 0.85rem 1.75rem;
+}
+.btn-hero:hover {
+  background: var(--color-brand-active);
+}
+
+.btn-outline-light {
+  background: transparent;
+  color: #fff;
+  border: 1px solid #fff;
+}
+.btn-outline-light:hover {
+  background: #fff;
+  color: var(--color-brand);
+}
+
+/* Titre hero « MBT TAXIS® » — Poppins, blanc (spec display-1) */
+.display-1 {
+  font-family: var(--font-poppins), sans-serif !important;
+  font-size: calc(1.625rem + 4.5vw);
+  font-weight: 700;
+  line-height: 1.1;
+  color: #ffffff !important;
+}
+@media (min-width: 75rem) {
+  .display-1 {
+    font-size: 5rem;
+  }
+}
+
+/* Titres hero pages internes (ex. réservation) — Poppins blanc gras */
+.hero-page-title {
+  font-family: var(--font-poppins), sans-serif !important;
+  font-weight: 700 !important;
+  font-size: clamp(2rem, 1.4rem + 2.8vw, 3.5rem);
+  line-height: 1.15;
+  color: #ffffff !important;
+}
+
+/* Sous-titre hero — Poppins gras, bleu, grand et gros (comme l’original) */
+.hero-subtitle {
+  font-family: var(--font-poppins), sans-serif !important;
+  font-weight: 700 !important;
+  font-size: clamp(2rem, 1.25rem + 3.5vw, 4rem);
+  line-height: 1.15;
+  color: #1560bd !important;
+  letter-spacing: -0.01em;
+}
+
+.hero-lead {
+  font-family: var(--font-raleway), sans-serif !important;
+  font-weight: 400;
+  font-size: clamp(1.05rem, 1rem + 0.35vw, 1.25rem);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Titres / texte sur fond bleu ou sombre */
+.heading-on-brand,
+.text-on-dark {
+  color: #ffffff !important;
+}
+
+.bg-brand {
+  color: #ffffff;
+}
+
+.bg-brand :where(h1, h2, h3, h4, h5, h6, a) {
+  color: #ffffff !important;
+}
+
+.bg-brand :where(p, li) {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* Overlay sombre (cartes photo, devis) */
+.on-dark :where(h1, h2, h3, h4, h5, h6) {
+  color: #ffffff !important;
+}
+
+.on-dark :where(p, li) {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.hero-curve {
+  border-bottom-left-radius: 5rem;
+  border-bottom-right-radius: 5rem;
+}
+
+.img-placeholder {
+  background: linear-gradient(135deg, #c5d8ef 0%, #8fb0d9 45%, #1560bd 100%);
+}
+
+.form-field {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 48rem) {
+  .form-field {
+    grid-template-columns: 14rem 1fr;
+    align-items: center;
+  }
+}
+
+.form-field label {
+  font-weight: 400;
+  color: var(--color-body);
+}
+
+.form-field input,
+.form-field textarea,
+.form-field select {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 0.4rem;
+  padding: 0.55rem 0.75rem;
+  font: inherit;
+  background: #fff;
+}
+
+.form-field textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.form-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  grid-column: 1 / -1;
+}

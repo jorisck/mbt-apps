@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build / cache
+.turbo/
+.next/
+dist/
+out/
+build/
+coverage/
+*.tsbuildinfo
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+*.pem
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE / tooling
+.vercel/
+.idea/
+*.swp
+*.swo
+
+# Archives & transfers (large binaries)
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Local reference material (not app source)
+infos/
+stitch_*/
+*.xlsx
