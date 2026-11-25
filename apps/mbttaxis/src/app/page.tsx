@@ -45,7 +45,8 @@ export default function HomePage() {
             <h1 className="display-1 mt-3 max-w-4xl">{home.hero.title}</h1>
           </Reveal>
           <Reveal direction="left" delay={0.18}>
-            <p className="hero-lead mt-4 max-w-2xl">{home.hero.text}</p>
+            {/* largeur ≈ celle du titre (8,5 × sa taille de police) */}
+            <p className="hero-lead mt-4 max-w-[calc(8.5*(1.625rem+4.5vw))] min-[75rem]:max-w-[42.5rem]">{home.hero.text}</p>
           </Reveal>
           <Reveal direction="right" delay={0.3}>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">

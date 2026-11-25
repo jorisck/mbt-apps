@@ -11,7 +11,7 @@ export const site = {
   handycabPhone: "+32 (0)2 315 31 00",
   handycabPhoneShort: "02 315 31 00",
   handycabPhoneHref: "tel:+3223153100",
-  handycabBooking: "https://booking.handycab.be/",
+  handycabBooking: process.env.NEXT_PUBLIC_HANDYCAB_URL ?? "https://handycab.vercel.app/application",
   handycabPlay:
     "https://play.google.com/store/apps/details?id=be.handycab.android",
   handycabAppStore: "https://apps.apple.com/be/app/handycab/id1495297360",
