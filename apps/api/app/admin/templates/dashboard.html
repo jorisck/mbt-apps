@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord{% endblock %}
+{% block content %}
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl">Tableau de bord</h1>
+  <span class="htmx-indicator text-xs text-brand-muted">Actualisation…</span>
+</div>
+<div id="dashboard-blocks"
+     hx-get="/fragments/dashboard"
+     hx-trigger="every 30s"
+     hx-swap="innerHTML"
+     hx-indicator="previous .htmx-indicator">
+  {% include "_dashboard_blocks.html" %}
+</div>
+{% endblock %}

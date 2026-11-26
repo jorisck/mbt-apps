@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf %}
+{% block title %}Administrateurs{% endblock %}
+{% block content %}
+<h1 class="mb-4 text-2xl">Administrateurs</h1>
+{% if error %}<p class="alert-error mb-4" role="alert">{{ error }}</p>{% endif %}
+{% if ok %}<p class="alert-ok mb-4" role="status">{{ ok }}</p>{% endif %}
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card p-0 lg:col-span-2">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-brand-border">
+        <thead>
+          <tr><th class="th">Nom</th><th class="th">E-mail</th><th class="th">Statut</th><th class="th">Dernière connexion</th><th class="th"><span class="sr-only">Actions</span></th></tr>
+        </thead>
+        <tbody class="divide-y divide-brand-border">
+          {% for a in admins %}
+          <tr>
+            <td class="td font-medium">{{ a.full_name }}{% if a.id == auth.admin.id %} <span class="text-xs text-brand-muted">(vous)</span>{% endif %}</td>
+            <td class="td">{{ a.email }}</td>
+            <td class="td">
+              {% if a.status == 'active' %}<span class="badge-completed">Actif</span>
+              {% elif a.status == 'invited' %}<span class="badge-received">Invité</span>
+              {% else %}<span class="badge-cancelled">Désactivé</span>{% endif %}
+            </td>
+            <td class="td text-xs text-brand-muted">{{ a.last_login_at|brussels if a.last_login_at else '—' }}</td>
+            <td class="td">
+              {% if a.id != auth.admin.id %}
+              <div class="flex flex-wrap justify-end gap-2">
+                {% if a.status == 'disabled' %}
+                <form hx-post="/admins/{{ a.id }}/enable" hx-target="#content" hx-select="#content" hx-swap="outerHTML">{{ csrf() }}<button class="btn-secondary btn-sm" type="submit">Réactiver</button></form>
+                {% else %}
+                <form hx-post="/admins/{{ a.id }}/revoke-sessions" hx-target="#content" hx-select="#content" hx-swap="outerHTML" hx-confirm="Fermer toutes les sessions de {{ a.full_name }} ?">{{ csrf() }}<button class="btn-secondary btn-sm" type="submit">Fermer les sessions</button></form>
+                <form hx-post="/admins/{{ a.id }}/disable" hx-target="#content" hx-select="#content" hx-swap="outerHTML" hx-confirm="Désactiver le compte de {{ a.full_name }} ?">{{ csrf() }}<button class="btn-danger btn-sm" type="submit">Désactiver</button></form>
+                {% endif %}
+              </div>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card space-y-3" aria-labelledby="h-invite">
+    <h2 id="h-invite" class="text-lg">Inviter un administrateur</h2>
+    <form hx-post="/admins/invitations" hx-target="#content" hx-select="#content" hx-swap="outerHTML" class="space-y-3">
+      {{ csrf() }}
+      <div>
+        <label class="label" for="full_name">Nom complet</label>
+        <input id="full_name" name="full_name" class="input" maxlength="100" required>
+      </div>
+      <div>
+        <label class="label" for="invite_email">Adresse e-mail</label>
+        <input id="invite_email" name="email" type="email" class="input" maxlength="254" required>
+      </div>
+      <p class="hint">Un lien d'activation valable 72 heures est envoyé par e-mail. La confirmation de votre mot de passe est demandée.</p>
+      <button type="submit" class="btn-primary">Envoyer l'invitation</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Connexion{% endblock %}
+{% block content %}
+<div class="mx-auto mt-10 max-w-sm">
+  <div class="mb-6 flex items-center justify-center gap-3">
+    <img src="{{ asset('img/logo-handycab.png') }}" alt="" width="56" height="56" class="h-14 w-14 rounded-xl object-contain shadow-sm">
+    <div class="text-left">
+      <p class="font-display text-2xl font-bold leading-tight"><span class="rounded bg-brand-yellow px-1">Handy</span>Cab</p>
+      <p class="mt-0.5 text-sm text-brand-muted">Espace de gestion</p>
+    </div>
+  </div>
+  <form method="post" action="/login" class="card space-y-4" autocomplete="on">
+    <h1 class="text-xl">Connexion</h1>
+    {% if notice %}<p class="alert-ok" role="status">{{ notice }}</p>{% endif %}
+    {% if error %}<p class="alert-error" role="alert">{{ error }}</p>{% endif %}
+    <div>
+      <label class="label" for="email">Adresse e-mail</label>
+      <input id="email" name="email" type="email" class="input" value="{{ email }}" autocomplete="username" required autofocus>
+    </div>
+    <div>
+      <label class="label" for="password">Mot de passe</label>
+      <input id="password" name="password" type="password" class="input" autocomplete="current-password" required>
+    </div>
+    <button type="submit" class="btn-primary w-full">Se connecter</button>
+    <p class="text-center text-sm"><a class="text-brand-accent hover:underline" href="/password/forgot">Mot de passe oublié ?</a></p>
+  </form>
+  <p class="mt-4 text-center">
+    <a href="{{ handycab_url }}" class="btn-secondary w-full" target="_blank" rel="noopener noreferrer">En savoir plus sur HandyCab&nbsp;?</a>
+  </p>
+</div>
+{% endblock %}

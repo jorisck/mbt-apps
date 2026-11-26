@@ -1,0 +1,22 @@
+{
+  "name": "api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FastAPI : API publique /v1, espace de gestion (Jinja2 + HTMX), worker. Les scripts lancent l'environnement conda mbt-api.",
+  "scripts": {
+    "build": "tailwindcss -i app/admin/assets/admin.css -o app/admin/static/admin.css --minify",
+    "dev": "concurrently -k -n css,api,worker -c yellow,blue,green \"pnpm:dev:css\" \"pnpm:dev:server\" \"pnpm:dev:worker\"",
+    "dev:css": "tailwindcss -i app/admin/assets/admin.css -o app/admin/static/admin.css --watch",
+    "dev:server": "conda run --no-capture-output -n mbt-api uvicorn app.main:app --reload --port 8000",
+    "dev:worker": "conda run --no-capture-output -n mbt-api python -m app.worker",
+    "migrate": "conda run --no-capture-output -n mbt-api python -m app.cli release",
+    "admin:create": "conda run --no-capture-output -n mbt-api python -m app.cli admin create",
+    "test": "conda run --no-capture-output -n mbt-api python -m pytest",
+    "lint": "conda run --no-capture-output -n mbt-api ruff check ."
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "concurrently": "^9.2.1",
+    "tailwindcss": "4.3.3"
+  }
+}

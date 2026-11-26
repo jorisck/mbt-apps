@@ -1,0 +1,40 @@
+{% from "_macros.html" import request_table %}
+<div class="space-y-6" data-new-count="{{ d.new_count }}">
+  {% if not d.worker_ok %}
+  <p class="alert-warn" role="alert">
+    Le service d'envoi des e-mails ne répond plus
+    {% if d.worker_seen_at %}(dernier signe de vie {{ d.worker_seen_at|ago }}){% endif %}.
+    Les e-mails restent en attente et partiront dès son retour.
+  </p>
+  {% endif %}
+  {% if d.failed_emails %}
+  <p class="alert-error" role="alert">{{ d.failed_emails }} e-mail(s) en échec définitif : vérifiez la fiche des demandes concernées.</p>
+  {% endif %}
+
+  <section class="card" aria-labelledby="h-new">
+    <h2 id="h-new" class="mb-3 text-lg">
+      Nouvelles demandes
+      <span class="ml-1 rounded-full bg-brand-yellow px-2 py-0.5 text-sm">{{ d.new_count }}</span>
+    </h2>
+    {{ request_table(d.new_requests, "Aucune demande en attente de traitement.", d.stale_minutes) }}
+  </section>
+
+  {% if d.to_regularize %}
+  <section class="card border-amber-300" aria-labelledby="h-reg">
+    <h2 id="h-reg" class="mb-1 text-lg">À régulariser</h2>
+    <p class="mb-3 text-sm text-brand-muted">Heure de prise en charge dépassée sans clôture : confirmez, refusez ou marquez la course terminée.</p>
+    {{ request_table(d.to_regularize, "") }}
+  </section>
+  {% endif %}
+
+  <div class="grid gap-6 lg:grid-cols-2">
+    <section class="card" aria-labelledby="h-today">
+      <h2 id="h-today" class="mb-3 text-lg">Courses d'aujourd'hui <span class="text-sm font-normal text-brand-muted">({{ d.today|length }})</span></h2>
+      {{ request_table(d.today, "Aucune course confirmée aujourd'hui.") }}
+    </section>
+    <section class="card" aria-labelledby="h-tomorrow">
+      <h2 id="h-tomorrow" class="mb-3 text-lg">Courses de demain <span class="text-sm font-normal text-brand-muted">({{ d.tomorrow|length }})</span></h2>
+      {{ request_table(d.tomorrow, "Aucune course confirmée demain.") }}
+    </section>
+  </div>
+</div>

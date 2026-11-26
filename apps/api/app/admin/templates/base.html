@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="icon" href="{{ asset('img/favicon.ico') }}" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/icon-32.png') }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('img/icon-192.png') }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/apple-touch-icon.png') }}">
+  <meta name="htmx-config" content='{"includeIndicatorStyles":false,"allowEval":false,"allowScriptTags":false,"historyCacheSize":0,"refreshOnHistoryMiss":true}'>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}Gestion{% endblock %} · MBT Taxis</title>
+  <link rel="stylesheet" href="{{ asset('admin.css') }}">
+  <script src="{{ asset('vendor/htmx.min.js') }}" defer></script>
+  <script src="{{ asset('admin.js') }}" defer></script>
+</head>
+<body class="flex min-h-screen flex-col">
+  {% if auth %}
+  <header class="bg-brand-dark text-white">
+    <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
+      <a href="/" class="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight" aria-label="HandyCab, espace de gestion : tableau de bord">
+        <img src="{{ asset('img/logo-handycab.png') }}" alt="" width="36" height="36" class="h-9 w-9 rounded-lg object-contain">
+        <span><span class="text-brand-yellow">Handy</span>Cab <span class="text-xs font-medium text-white/60">gestion</span></span>
+      </a>
+      <nav aria-label="Navigation principale" class="flex flex-1 gap-1 overflow-x-auto">
+        {% for key, label, href in [
+          ('dashboard', 'Tableau de bord', '/'),
+          ('demandes', 'Demandes', '/demandes'),
+          ('admins', 'Administrateurs', '/admins'),
+          ('settings', 'Paramètres', '/settings'),
+          ('audit', 'Journal d\'audit', '/audit-log'),
+        ] %}
+        <a href="{{ href }}" class="nav-link {% if nav == key %}nav-link-active{% endif %}"{% if nav == key %} aria-current="page"{% endif %}>{{ label }}</a>
+        {% endfor %}
+      </nav>
+      <div class="flex items-center gap-3 text-sm">
+        <a href="/account" class="text-white/80 hover:text-white {% if nav == 'account' %}underline{% endif %}">{{ auth.admin.full_name }}</a>
+        <form method="post" action="/logout">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="btn-secondary btn-sm" type="submit">Déconnexion</button>
+        </form>
+      </div>
+    </div>
+  </header>
+  {% endif %}
+
+  <div id="flash" class="mx-auto max-w-7xl px-4 pt-4 empty:hidden" role="status" aria-live="polite"></div>
+
+  <main id="content" class="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="py-6 text-center text-sm text-brand-muted">
+    Un service proposé par
+    <a href="{{ mbttaxis_url }}" class="font-semibold text-brand-dark underline-offset-2 hover:underline" target="_blank" rel="noopener noreferrer">MBT Taxis</a>
+  </footer>
+
+  {% if auth %}
+  <dialog id="stepup-dialog" class="m-auto w-full max-w-md rounded-xl p-0 shadow-xl backdrop:bg-black/50">
+    <form id="stepup-form" method="dialog" class="space-y-4 p-6">
+      <h2 class="text-lg">Confirmez votre identité</h2>
+      <p class="text-sm text-brand-muted">Cette action est sensible : saisissez à nouveau votre mot de passe. La confirmation reste valable 10 minutes.</p>
+      <div>
+        <label class="label" for="stepup-password">Mot de passe</label>
+        <input id="stepup-password" name="password" type="password" class="input" autocomplete="current-password" required>
+        <p id="stepup-error" class="mt-1 hidden text-sm text-red-700" role="alert"></p>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" id="stepup-cancel" class="btn-secondary">Annuler</button>
+        <button type="submit" class="btn-primary">Confirmer</button>
+      </div>
+    </form>
+  </dialog>
+  {% endif %}
+</body>
+</html>

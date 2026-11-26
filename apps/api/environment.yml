@@ -1,0 +1,9 @@
+name: mbt-api
+channels:
+  - conda-forge
+dependencies:
+  - python=3.14
+  - pip
+  - pip:
+      # Les dépendances applicatives sont déclarées dans pyproject.toml
+      - -e .[dev]

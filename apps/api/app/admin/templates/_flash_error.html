@@ -1,0 +1,6 @@
+<div id="flash-error" class="alert-error" role="alert">
+  {{ message }}
+  {% if code in ('revision_mismatch',) %}
+  <a class="font-semibold underline" href="">Recharger la fiche</a>
+  {% endif %}
+</div>

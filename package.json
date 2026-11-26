@@ -6,7 +6,12 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "dev:mbttaxis": "turbo run dev --filter=mbttaxis",
-    "dev:handycab": "turbo run dev --filter=handycab"
+    "dev:handycab": "turbo run dev --filter=handycab",
+    "dev:api": "pnpm --filter api dev",
+    "api:server": "pnpm --filter api dev:server",
+    "api:worker": "pnpm --filter api dev:worker",
+    "api:migrate": "pnpm --filter api migrate",
+    "api:test": "pnpm --filter api test"
   },
   "devDependencies": {
     "turbo": "^2.11.13",

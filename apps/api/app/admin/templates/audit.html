@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf %}
+{% block title %}Journal d'audit{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-2xl">Journal d'audit</h1>
+  <div class="flex items-center gap-3">
+    <div id="verify-result" aria-live="polite"></div>
+    <form hx-post="/audit-log/verify" hx-target="#verify-result" hx-swap="innerHTML">
+      {{ csrf() }}
+      <button type="submit" class="btn-secondary btn-sm">Vérifier l'intégrité</button>
+    </form>
+  </div>
+</div>
+
+<form method="get" action="/audit-log" class="card mb-4 flex flex-wrap items-end gap-3">
+  <div>
+    <label class="label" for="action">Action commençant par</label>
+    <input id="action" name="action" class="input" value="{{ action }}" placeholder="auth., demande., admin., settings.">
+  </div>
+  <button class="btn-dark" type="submit">Filtrer</button>
+  <a href="/audit-log" class="text-sm text-brand-accent hover:underline">Réinitialiser</a>
+</form>
+
+<div class="card p-0">
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-brand-border">
+      <thead><tr><th class="th">N°</th><th class="th">Date</th><th class="th">Acteur</th><th class="th">Action</th><th class="th">Objet</th><th class="th">IP</th><th class="th">Détails</th></tr></thead>
+      <tbody class="divide-y divide-brand-border">
+        {% for entry, name in rows %}
+        <tr>
+          <td class="td text-xs text-brand-muted">{{ entry.id }}</td>
+          <td class="td whitespace-nowrap">{{ entry.occurred_at|brussels }}</td>
+          <td class="td">{{ name or entry.actor_type }}</td>
+          <td class="td font-mono text-xs">{{ entry.action }}</td>
+          <td class="td text-xs">{{ entry.entity_type or '' }} {{ (entry.entity_id or '')[:8] }}</td>
+          <td class="td text-xs text-brand-muted">{{ entry.ip or '' }}</td>
+          <td class="td max-w-sm break-words font-mono text-xs text-brand-muted">{% if entry.details %}{{ entry.details|tojson }}{% endif %}</td>
+        </tr>
+        {% else %}
+        <tr><td class="td text-center text-brand-muted" colspan="7">Aucune entrée.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if pages > 1 %}
+  <nav class="flex items-center justify-between border-t border-brand-border px-4 py-3 text-sm" aria-label="Pagination">
+    {% if page > 1 %}<a class="btn-secondary btn-sm" href="/audit-log?action={{ action|urlencode }}&page={{ page - 1 }}">← Plus récentes</a>{% else %}<span></span>{% endif %}
+    <span class="text-brand-muted">Page {{ page }} / {{ pages }}</span>
+    {% if page < pages %}<a class="btn-secondary btn-sm" href="/audit-log?action={{ action|urlencode }}&page={{ page + 1 }}">Plus anciennes →</a>{% else %}<span></span>{% endif %}
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

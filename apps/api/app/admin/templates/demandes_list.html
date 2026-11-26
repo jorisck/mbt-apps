@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Demandes{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <h1 class="text-2xl">Demandes</h1>
+  <div class="flex items-center gap-2">
+    <form method="get" action="/demandes/export.csv" id="export-form" class="flex items-center gap-2">
+      <label class="flex items-center gap-1 text-xs text-brand-muted"><input type="checkbox" name="include_health" value="1"> inclure les besoins (santé)</label>
+      <button type="submit" class="btn-secondary btn-sm" data-export-link>Exporter en CSV</button>
+    </form>
+  </div>
+</div>
+
+<form id="filters" method="get" action="/demandes"
+      class="card mb-4 space-y-4"
+      hx-get="/demandes"
+      hx-target="#demandes-results"
+      hx-swap="innerHTML"
+      hx-push-url="true"
+      hx-trigger="input changed delay:300ms from:#q, change, submit"
+      hx-indicator="#list-indicator">
+  <div class="flex flex-wrap gap-2" role="group" aria-label="Raccourcis">
+    {% for key, label in shortcuts %}
+    <label class="cursor-pointer">
+      <input type="radio" class="peer sr-only" name="shortcut" value="{{ key }}" {% if f.shortcut == key %}checked{% endif %}>
+      <span class="btn-secondary btn-sm peer-checked:bg-brand-dark peer-checked:text-white peer-focus-visible:outline-2">{{ label }}</span>
+    </label>
+    {% endfor %}
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-4">
+    <div class="md:col-span-2">
+      <label class="label" for="q">Recherche</label>
+      <input id="q" name="q" type="search" class="input" value="{{ f.q }}" placeholder="Nom, téléphone, e-mail, référence, adresse…" autocomplete="off">
+    </div>
+    <div>
+      <label class="label" for="pickup_from">Prise en charge du</label>
+      <input id="pickup_from" name="pickup_from" type="date" class="input" value="{{ f.pickup_from or '' }}">
+    </div>
+    <div>
+      <label class="label" for="pickup_to">au</label>
+      <input id="pickup_to" name="pickup_to" type="date" class="input" value="{{ f.pickup_to or '' }}">
+    </div>
+    <div>
+      <label class="label" for="received_from">Reçue du</label>
+      <input id="received_from" name="received_from" type="date" class="input" value="{{ f.received_from or '' }}">
+    </div>
+    <div>
+      <label class="label" for="received_to">au</label>
+      <input id="received_to" name="received_to" type="date" class="input" value="{{ f.received_to or '' }}">
+    </div>
+    <div>
+      <label class="label" for="account">Compte</label>
+      <select id="account" name="account" class="input">
+        <option value="">Tous</option>
+        <option value="yes" {% if f.has_account is true %}selected{% endif %}>Avec compte</option>
+        <option value="no" {% if f.has_account is false %}selected{% endif %}>Sans compte</option>
+      </select>
+    </div>
+    <div>
+      <label class="label" for="sort">Tri</label>
+      <select id="sort" name="sort" class="input">
+        <option value="pickup" {% if f.sort == 'pickup' %}selected{% endif %}>Prise en charge (proche d'abord)</option>
+        <option value="received" {% if f.sort == 'received' %}selected{% endif %}>Réception (récente d'abord)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-x-8 gap-y-3">
+    <fieldset>
+      <legend class="label">Statut</legend>
+      <div class="flex flex-wrap gap-3 text-sm">
+        {% for s in statuses %}
+        <label class="flex items-center gap-1"><input type="checkbox" name="status" value="{{ s }}" {% if s in f.statuses %}checked{% endif %}> {{ s|status_label }}</label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend class="label">Origine</legend>
+      <div class="flex flex-wrap gap-3 text-sm">
+        {% for o in origins %}
+        <label class="flex items-center gap-1"><input type="checkbox" name="origin" value="{{ o }}" {% if o in f.origins %}checked{% endif %}> {{ o|origin_label }}</label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend class="label">Autres</legend>
+      <div class="flex flex-wrap gap-3 text-sm">
+        <label class="flex items-center gap-1"><input type="checkbox" name="wheelchair" value="1" {% if f.wheelchair %}checked{% endif %}> Fauteuil roulant</label>
+        <label class="flex items-center gap-1"><input type="checkbox" name="auto" value="1" {% if f.auto_closed %}checked{% endif %}> Clôturées automatiquement</label>
+      </div>
+    </fieldset>
+  </div>
+  <div class="flex items-center gap-3">
+    <noscript><button type="submit" class="btn-primary btn-sm">Filtrer</button></noscript>
+    <a href="/demandes" class="text-sm text-brand-accent hover:underline">Réinitialiser</a>
+    <span id="list-indicator" class="htmx-indicator text-xs text-brand-muted">Chargement…</span>
+  </div>
+</form>
+
+<div id="demandes-results">
+  {% include "_demandes_table.html" %}
+</div>
+{% endblock %}

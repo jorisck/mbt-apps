@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf %}
+{% block title %}Mon compte{% endblock %}
+{% block content %}
+<h1 class="mb-4 text-2xl">Mon compte</h1>
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card space-y-3" aria-labelledby="h-profile">
+    <h2 id="h-profile" class="text-lg">Profil</h2>
+    {% if profile_ok %}<p class="alert-ok" role="status">{{ profile_ok }}</p>{% endif %}
+    {% if profile_error %}<p class="alert-error" role="alert">{{ profile_error }}</p>{% endif %}
+    <form method="post" action="/account/profile" class="space-y-3">
+      {{ csrf() }}
+      <div>
+        <label class="label" for="email-ro">Adresse e-mail</label>
+        <input id="email-ro" class="input bg-brand-surface" value="{{ auth.admin.email }}" readonly>
+      </div>
+      <div>
+        <label class="label" for="full_name">Nom complet</label>
+        <input id="full_name" name="full_name" class="input" value="{{ auth.admin.full_name }}" maxlength="100" required>
+      </div>
+      <button class="btn-dark" type="submit">Enregistrer</button>
+    </form>
+  </section>
+
+  <section class="card space-y-3" aria-labelledby="h-password">
+    <h2 id="h-password" class="text-lg">Changer le mot de passe</h2>
+    {% if password_ok %}<p class="alert-ok" role="status">{{ password_ok }}</p>{% endif %}
+    {% if password_error %}<p class="alert-error" role="alert">{{ password_error }}</p>{% endif %}
+    <form method="post" action="/account/password" class="space-y-3">
+      {{ csrf() }}
+      <div>
+        <label class="label" for="current">Mot de passe actuel</label>
+        <input id="current" name="current" type="password" class="input" autocomplete="current-password" required>
+      </div>
+      <div>
+        <label class="label" for="new">Nouveau mot de passe</label>
+        <input id="new" name="new" type="password" class="input" autocomplete="new-password" minlength="12" maxlength="128" required>
+        <p class="hint">12 caractères minimum.</p>
+      </div>
+      <div>
+        <label class="label" for="confirm">Confirmation</label>
+        <input id="confirm" name="confirm" type="password" class="input" autocomplete="new-password" minlength="12" maxlength="128" required>
+      </div>
+      <button class="btn-dark" type="submit">Modifier le mot de passe</button>
+    </form>
+  </section>
+
+  <section class="card space-y-3 lg:col-span-2" aria-labelledby="h-sessions">
+    <h2 id="h-sessions" class="text-lg">Sessions actives</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-brand-border">
+        <thead><tr><th class="th">Appareil</th><th class="th">IP</th><th class="th">Connectée</th><th class="th">Dernière activité</th><th class="th"><span class="sr-only">Action</span></th></tr></thead>
+        <tbody class="divide-y divide-brand-border">
+          {% for s in sessions %}
+          <tr>
+            <td class="td max-w-xs truncate text-xs">{{ (s.user_agent or 'Inconnu')[:80] }}{% if s.id == current_session_id %} <span class="badge-confirmed">cette session</span>{% endif %}</td>
+            <td class="td text-xs">{{ s.ip or '' }}</td>
+            <td class="td text-xs">{{ s.created_at|brussels }}</td>
+            <td class="td text-xs">{{ s.last_seen_at|ago }}</td>
+            <td class="td">
+              {% if s.id != current_session_id %}
+              <form method="post" action="/account/sessions/{{ s.id }}/revoke">{{ csrf() }}<button class="btn-secondary btn-sm" type="submit">Fermer</button></form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

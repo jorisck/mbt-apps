@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}{{ d.reference }}{% endblock %}
+{% block content %}
+<p class="mb-3 text-sm"><a class="text-brand-accent hover:underline" href="/demandes">← Toutes les demandes</a></p>
+<div id="detail">
+  {% include "_demande_body.html" %}
+</div>
+{% endblock %}

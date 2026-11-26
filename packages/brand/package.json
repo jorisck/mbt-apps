@@ -1,0 +1,10 @@
+{
+  "name": "@mbt/brand",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Charte graphique Handycab (thème Tailwind v4) partagée par les sites et l'espace de gestion",
+  "files": ["theme.css"],
+  "exports": {
+    "./theme.css": "./theme.css"
+  }
+}

@@ -1,0 +1,215 @@
+{% from "_macros.html" import badge, csrf %}
+{% set needs = d.needs %}
+{% set base = '/demandes/' ~ d.id %}
+
+{% if flash_ok %}<p class="alert-ok mb-4" role="status">{{ flash_ok }}</p>{% endif %}
+
+<div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+  <div>
+    <h1 class="flex flex-wrap items-center gap-3 text-2xl">{{ d.reference }} {{ badge(d.status) }}</h1>
+    <p class="mt-1 text-sm text-brand-muted">
+      Reçue le {{ d.created_at|brussels }} · {{ d.origin|origin_label }} · service {{ d.service|service_label }}
+      {% if d.closed_at %}· clôturée le {{ d.closed_at|brussels }}{% if d.closed_by == 'system' %} (automatiquement){% endif %}{% endif %}
+    </p>
+  </div>
+  <div class="text-sm">
+    {% if detail.assigned_name %}
+    <p>Pris en charge par <strong>{{ detail.assigned_name }}</strong></p>
+    {% endif %}
+    {% if d.status not in FINAL %}
+    <form hx-post="{{ base }}/assign" hx-target="#detail" hx-swap="innerHTML" class="mt-1">
+      {{ csrf() }}
+      <input type="hidden" name="revision" value="{{ d.revision }}">
+      {% if d.assigned_admin_id == me.id %}
+      <input type="hidden" name="release" value="1">
+      <button class="btn-secondary btn-sm" type="submit">Libérer</button>
+      {% else %}
+      <button class="btn-secondary btn-sm" type="submit">Je m'en occupe</button>
+      {% endif %}
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if d.status == 'received' and pickup_passed %}
+<p class="alert-warn mb-4">L'heure de prise en charge est dépassée : régularisez cette demande.</p>
+{% endif %}
+
+{# --- Actions possibles -------------------------------------------------------------- #}
+{% if actions %}
+<section class="card mb-6" aria-labelledby="h-actions">
+  <h2 id="h-actions" class="mb-3 text-lg">Actions</h2>
+  <div class="flex flex-wrap items-start gap-3">
+    {% for to in actions %}
+      {% set needs_reason = to in ('refused', 'cancelled') or (to == 'not_completed') or (d.status in ('completed', 'not_completed')) %}
+      {% if not needs_reason %}
+      <form hx-post="{{ base }}/transition" hx-target="#detail" hx-swap="innerHTML"
+            {% if to == 'confirmed' %}{% else %}hx-confirm="Marquer la course comme « {{ to|status_label }} » ?"{% endif %}>
+        {{ csrf() }}
+        <input type="hidden" name="revision" value="{{ d.revision }}">
+        <input type="hidden" name="to" value="{{ to }}">
+        <button class="btn-primary" type="submit">{% if to == 'confirmed' %}Confirmer{% elif to == 'completed' %}Marquer terminée{% else %}{{ to|status_label }}{% endif %}</button>
+      </form>
+      {% else %}
+      <details class="rounded-lg border border-brand-border bg-brand-surface p-3">
+        <summary class="cursor-pointer text-sm font-semibold">
+          {% if d.status in ('completed', 'not_completed') %}Corriger : {{ to|status_label }}
+          {% elif to == 'refused' %}Refuser
+          {% elif to == 'cancelled' %}Annuler
+          {% else %}Marquer « {{ to|status_label }} »{% endif %}
+        </summary>
+        <form hx-post="{{ base }}/transition" hx-target="#detail" hx-swap="innerHTML" class="mt-3 w-72 space-y-3">
+          {{ csrf() }}
+          <input type="hidden" name="revision" value="{{ d.revision }}">
+          <input type="hidden" name="to" value="{{ to }}">
+          <div>
+            <label class="label" for="reason-{{ to }}">Motif</label>
+            <select id="reason-{{ to }}" name="reason_choice" class="input" required>
+              <option value="">Choisir…</option>
+              {% for r in reasons_by_target[to] %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="label" for="text-{{ to }}">Précision <span class="font-normal text-brand-muted">(obligatoire pour « Autre »)</span></label>
+            <textarea id="text-{{ to }}" name="reason_text" class="input" rows="2" maxlength="500"></textarea>
+            {% if to in ('refused', 'cancelled') %}<p class="hint">Ce motif est transmis au passager par e-mail.</p>{% endif %}
+          </div>
+          <button class="btn-danger btn-sm" type="submit">Valider</button>
+        </form>
+      </details>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% elif d.status in FINAL %}
+<p class="mb-6 text-sm text-brand-muted">Cette demande est clôturée : aucune action n'est disponible.</p>
+{% endif %}
+
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card space-y-3" aria-labelledby="h-passenger">
+    <h2 id="h-passenger" class="text-lg">Passager</h2>
+    <dl class="grid grid-cols-[8rem_1fr] gap-y-2 text-sm">
+      <dt class="text-brand-muted">Nom</dt><dd>{{ d.passenger_first_name }} {{ d.passenger_last_name }}</dd>
+      <dt class="text-brand-muted">Téléphone</dt><dd><a class="text-brand-accent hover:underline" href="tel:{{ d.passenger_phone|tel }}">{{ d.passenger_phone }}</a></dd>
+      <dt class="text-brand-muted">E-mail</dt><dd>{% if d.passenger_email %}<a class="text-brand-accent hover:underline" href="mailto:{{ d.passenger_email }}">{{ d.passenger_email }}</a>{% else %}—{% endif %}</dd>
+      <dt class="text-brand-muted">Langue</dt><dd>{{ d.language|upper }}</dd>
+      <dt class="text-brand-muted">Compte</dt><dd>{{ 'Oui' if d.passenger_id else 'Non (demande sans compte)' }}</dd>
+      <dt class="text-brand-muted">Passagers</dt><dd>{{ d.passenger_count }}</dd>
+    </dl>
+  </section>
+
+  <section class="card space-y-3" aria-labelledby="h-trip">
+    <h2 id="h-trip" class="text-lg">Trajet</h2>
+    <dl class="grid grid-cols-[8rem_1fr] gap-y-2 text-sm">
+      <dt class="text-brand-muted">Prise en charge</dt><dd><strong>{{ d.pickup_at|brussels }}</strong></dd>
+      <dt class="text-brand-muted">Départ</dt><dd>{{ d.pickup_address.formatted }}{% if d.pickup_address.get('verified') is false %} <span class="text-xs text-amber-800">(adresse non vérifiée)</span>{% endif %}</dd>
+      {% if d.pickup_instructions %}<dt class="text-brand-muted">Précisions</dt><dd class="whitespace-pre-line">{{ d.pickup_instructions }}</dd>{% endif %}
+      <dt class="text-brand-muted">Destination</dt><dd>{{ d.dropoff_address.formatted }}</dd>
+      {% if d.return_at %}
+      <dt class="text-brand-muted">Retour</dt><dd><strong>{{ d.return_at|brussels }}</strong>{% if d.return_pickup_address %}<br>depuis {{ d.return_pickup_address.formatted }}{% endif %}</dd>
+      {% endif %}
+    </dl>
+  </section>
+
+  {% if needs or d.comment %}
+  <section class="card space-y-3" aria-labelledby="h-needs">
+    <h2 id="h-needs" class="text-lg">Besoins et remarques</h2>
+    {% if needs %}
+    <p class="text-xs text-brand-muted">Donnée de santé : consentement recueilli le {{ d.health_consent_at|brussels if d.health_consent_at else '—' }}.</p>
+    <dl class="grid grid-cols-[8rem_1fr] gap-y-2 text-sm">
+      <dt class="text-brand-muted">Aide à la mobilité</dt><dd>{{ needs.mobility_aid|mobility_label }}</dd>
+      {% if needs.stays_in_wheelchair %}<dt class="text-brand-muted">Fauteuil</dt><dd>Reste dans son fauteuil</dd>{% endif %}
+      {% if needs.companions %}<dt class="text-brand-muted">Accompagnants</dt><dd>{{ needs.companions }}</dd>{% endif %}
+      {% if needs.door_to_door %}<dt class="text-brand-muted">Assistance</dt><dd>Porte à porte</dd>{% endif %}
+      {% if needs.notes %}<dt class="text-brand-muted">Remarques</dt><dd class="whitespace-pre-line">{{ needs.notes }}</dd>{% endif %}
+    </dl>
+    {% endif %}
+    {% if d.comment %}<p class="whitespace-pre-line text-sm"><span class="text-brand-muted">Commentaire :</span> {{ d.comment }}</p>{% endif %}
+  </section>
+  {% endif %}
+
+  {% if d.refusal_reason or d.cancellation_reason %}
+  <section class="card space-y-1" aria-labelledby="h-reason">
+    <h2 id="h-reason" class="text-lg">Motif</h2>
+    <p class="text-sm">{{ d.refusal_reason or d.cancellation_reason }}</p>
+    {% if d.cancelled_by %}<p class="text-xs text-brand-muted">Annulée par : {{ {'admin': 'l\'équipe', 'passenger': 'le passager'}.get(d.cancelled_by, d.cancelled_by) }}</p>{% endif %}
+  </section>
+  {% endif %}
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+  {# --- Notes internes --------------------------------------------------------------- #}
+  <section class="card space-y-4" aria-labelledby="h-notes">
+    <h2 id="h-notes" class="text-lg">Notes internes <span class="text-xs font-normal text-brand-muted">(jamais visibles du passager)</span></h2>
+    {% for note, author in detail.notes %}
+    <article class="rounded-lg bg-brand-surface p-3 text-sm">
+      <p class="whitespace-pre-line">{{ note.body }}</p>
+      <p class="mt-2 flex items-center justify-between text-xs text-brand-muted">
+        <span>{{ author }} · {{ note.created_at|brussels }}</span>
+        {% if note.admin_id == me.id %}
+        <form hx-post="{{ base }}/notes/{{ note.id }}/delete" hx-target="#detail" hx-swap="innerHTML" hx-confirm="Supprimer cette note ?">
+          {{ csrf() }}
+          <button class="text-red-700 hover:underline" type="submit">Supprimer</button>
+        </form>
+        {% endif %}
+      </p>
+    </article>
+    {% else %}
+    <p class="text-sm text-brand-muted">Aucune note.</p>
+    {% endfor %}
+    <form hx-post="{{ base }}/notes" hx-target="#detail" hx-swap="innerHTML" class="space-y-2">
+      {{ csrf() }}
+      <label class="label" for="note-body">Ajouter une note</label>
+      <textarea id="note-body" name="body" class="input" rows="3" maxlength="2000" required></textarea>
+      <button class="btn-dark btn-sm" type="submit">Ajouter</button>
+    </form>
+  </section>
+
+  {# --- Historique ------------------------------------------------------------------- #}
+  <section class="card" aria-labelledby="h-history">
+    <h2 id="h-history" class="mb-3 text-lg">Historique</h2>
+    <ol class="space-y-3 border-l-2 border-brand-border pl-4 text-sm">
+      {% for e in detail.events|reverse %}
+      <li>
+        <p>
+          {% if e.type == 'created' %}Demande reçue
+          {% elif e.type == 'assigned' %}Prise en charge modifiée
+          {% else %}{{ e.from_status|status_label }} → <strong>{{ e.to_status|status_label }}</strong>{% endif %}
+        </p>
+        {% if e.reason %}<p class="text-brand-muted">Motif : {{ e.reason }}</p>{% endif %}
+        <p class="text-xs text-brand-muted">
+          {{ e.created_at|brussels }} ·
+          {% if e.actor_type == 'admin' %}{{ detail.actor_names.get(e.actor_id, 'Équipe') }}
+          {% elif e.actor_type == 'system' %}Système
+          {% elif e.actor_type == 'passenger' %}Passager
+          {% else %}Formulaire public{% endif %}
+        </p>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+</div>
+
+{# --- E-mails ----------------------------------------------------------------------- #}
+{% if detail.emails %}
+<section class="card mt-6" aria-labelledby="h-emails">
+  <h2 id="h-emails" class="mb-3 text-lg">E-mails</h2>
+  <table class="min-w-full text-sm">
+    <thead><tr><th class="th">Modèle</th><th class="th">Destinataire</th><th class="th">État</th><th class="th">Envoi</th></tr></thead>
+    <tbody class="divide-y divide-brand-border">
+      {% for m in detail.emails %}
+      <tr>
+        <td class="td">{{ m.template }}</td>
+        <td class="td">{{ m.to_address }}</td>
+        <td class="td">
+          {% if m.status == 'sent' %}<span class="badge-completed">Envoyé</span>
+          {% elif m.status == 'failed' %}<span class="badge-refused">Échec</span>
+          {% else %}<span class="badge-received">En attente</span>{% endif %}
+        </td>
+        <td class="td text-xs text-brand-muted">{% if m.sent_at %}{{ m.sent_at|brussels }}{% elif m.last_error %}{{ m.last_error[:80] }}{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}

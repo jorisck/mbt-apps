@@ -1,0 +1,42 @@
+{% macro csrf() -%}
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+{%- endmacro %}
+
+{% macro badge(status) -%}
+<span class="badge-{{ status|replace('_', '-') }}">{{ status|status_label }}</span>
+{%- endmacro %}
+
+{# Tableau compact de demandes (tableau de bord). `stale` : minutes avant alerte. #}
+{% macro request_table(items, empty_text, stale=0) -%}
+{% if not items %}
+<p class="text-sm text-brand-muted">{{ empty_text }}</p>
+{% else %}
+<div class="overflow-x-auto">
+  <table class="min-w-full divide-y divide-brand-border">
+    <thead>
+      <tr>
+        <th class="th">Référence</th>
+        <th class="th">Passager</th>
+        <th class="th">Prise en charge</th>
+        <th class="th">Trajet</th>
+        <th class="th">Reçue</th>
+        <th class="th">Statut</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-brand-border">
+      {% for d in items %}
+      {% set is_stale = stale and d.status == 'received' and (d.created_at|minutes_since) >= stale %}
+      <tr class="{% if is_stale %}bg-amber-50{% endif %}">
+        <td class="td whitespace-nowrap"><a class="font-semibold text-brand-accent hover:underline" href="/demandes/{{ d.id }}">{{ d.reference }}</a></td>
+        <td class="td">{{ d.passenger_first_name }} {{ d.passenger_last_name }}<br><a class="text-xs text-brand-muted hover:underline" href="tel:{{ d.passenger_phone|tel }}">{{ d.passenger_phone }}</a></td>
+        <td class="td whitespace-nowrap">{{ d.pickup_at|brussels }}</td>
+        <td class="td max-w-xs text-xs text-brand-muted">{{ d.pickup_address.formatted }}<br>→ {{ d.dropoff_address.formatted }}</td>
+        <td class="td whitespace-nowrap text-xs {% if is_stale %}font-semibold text-amber-800{% else %}text-brand-muted{% endif %}">{{ d.created_at|ago }}</td>
+        <td class="td">{{ badge(d.status) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{%- endmacro %}
