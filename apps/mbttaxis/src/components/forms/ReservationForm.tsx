@@ -199,7 +199,7 @@ export function ReservationForm({
         as="textarea"
       />
 
-      <div className="form-field">
+      <div className="form-field form-field--consent">
         <label className="flex items-start gap-3 !normal-case">
           <input
             type="checkbox"

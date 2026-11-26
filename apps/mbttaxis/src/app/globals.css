@@ -283,6 +283,19 @@ h5 {
   resize: vertical;
 }
 
+.form-field--consent {
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+.form-field--consent input[type="checkbox"] {
+  width: auto;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+}
+
 .form-error {
   color: #dc3545;
   font-size: 0.875rem;

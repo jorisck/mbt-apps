@@ -59,7 +59,7 @@ export function ContactForm() {
           <p className="form-error">{state.errors.message[0]}</p>
         ) : null}
       </div>
-      <div className="form-field">
+      <div className="form-field form-field--consent">
         <label className="flex items-start gap-3 !normal-case">
           <input type="checkbox" name="consent" value="on" required className="mt-1" />
           <span>
