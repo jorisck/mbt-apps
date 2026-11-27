@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf %}
+{% block title %}{{ endpoint.name }}{% endblock %}
+
+{% macro ep_status_badge(s) %}
+{% if s == 'active' %}<span class="badge-completed">Actif</span>
+{% elif s == 'inactive' %}<span class="badge-received">Inactif</span>
+{% else %}<span class="badge-cancelled">Archivé</span>{% endif %}
+{% endmacro %}
+
+{% macro delivery_badge(s) %}
+{% if s == 'succeeded' %}<span class="badge-completed">Réussi</span>
+{% elif s == 'failed' %}<span class="badge-cancelled">Échoué</span>
+{% elif s == 'pending' %}<span class="badge-received">En attente</span>
+{% elif s == 'sending' %}<span class="badge-received">En cours</span>
+{% else %}<span class="badge-cancelled">Abandonné</span>{% endif %}
+{% endmacro %}
+
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+  <div class="flex items-center gap-3">
+    <a href="/connexions" class="text-sm text-brand-muted hover:underline">← Connexions</a>
+    <h1 class="text-2xl">{{ endpoint.name }}</h1>
+    {{ ep_status_badge(endpoint.status) }}
+  </div>
+</div>
+
+{# Flash #}
+{% if flash_ok %}<p class="alert-ok mb-4" role="status">{{ flash_ok }}</p>{% endif %}
+{% if flash_error %}<p class="alert-error mb-4" role="alert">{{ flash_error }}</p>{% endif %}
+
+{# Affichage du nouveau secret (une seule fois) #}
+{% if new_secret %}
+<div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 space-y-2">
+  <p class="font-semibold text-amber-800">🔑 Secret de signature — copiez-le maintenant</p>
+  <p class="break-all font-mono text-sm bg-white rounded border border-amber-200 px-3 py-2 select-all">{{ new_secret }}</p>
+  <p class="text-xs text-amber-700">Ce secret ne sera plus affiché. Configurez-le dans votre intégration pour vérifier les signatures.</p>
+</div>
+{% endif %}
+
+<div class="grid gap-6 lg:grid-cols-3">
+
+  {# ── Colonne principale ── #}
+  <div class="space-y-6 lg:col-span-2">
+
+    {# Infos générales #}
+    <section class="card space-y-3" aria-labelledby="h-info">
+      <h2 id="h-info" class="text-lg font-semibold">Informations</h2>
+      <dl class="grid gap-3 text-sm sm:grid-cols-2">
+        <div>
+          <dt class="font-medium text-brand-muted">URL</dt>
+          <dd class="break-all font-mono text-xs mt-0.5">{{ endpoint.url }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium text-brand-muted">Statut</dt>
+          <dd class="mt-0.5">{{ ep_status_badge(endpoint.status) }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium text-brand-muted">Données PMR</dt>
+          <dd class="mt-0.5">{{ 'Oui' if endpoint.include_health_data else 'Non' }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium text-brand-muted">Dernier test</dt>
+          <dd class="mt-0.5">
+            {% if endpoint.last_test_at %}
+            {{ endpoint.last_test_at|ago }}
+            {% if endpoint.last_test_ok %}<span class="text-green-700 ml-1">✓ Réussi</span>
+            {% else %}<span class="text-red-700 ml-1">✗ Échoué</span>{% endif %}
+            {% else %}<span class="text-brand-muted">Jamais testé</span>{% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt class="font-medium text-brand-muted">Créée</dt>
+          <dd class="mt-0.5 text-brand-muted">{{ endpoint.created_at|ago }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium text-brand-muted">Mise à jour</dt>
+          <dd class="mt-0.5 text-brand-muted">{{ endpoint.updated_at|ago }}</dd>
+        </div>
+      </dl>
+
+      <div>
+        <dt class="font-medium text-brand-muted text-sm mb-1">Événements</dt>
+        <dd>
+          {% if endpoint.events %}
+          <ul class="flex flex-wrap gap-1">
+            {% for ev in endpoint.events %}
+            <li class="rounded bg-brand-surface px-2 py-0.5 font-mono text-xs">{{ ev }}</li>
+            {% endfor %}
+          </ul>
+          {% else %}<span class="text-brand-muted text-sm">Aucun</span>{% endif %}
+        </dd>
+      </div>
+
+      {% if endpoint.secret_prev_expires_at %}
+      <p class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+        ⏳ Rotation en cours — l'ancien secret expire {{ endpoint.secret_prev_expires_at|ago }}.
+      </p>
+      {% endif %}
+    </section>
+
+    {# Modifier #}
+    {% if endpoint.status != 'archived' %}
+    <section class="card space-y-4" aria-labelledby="h-edit">
+      <h2 id="h-edit" class="text-lg font-semibold">Modifier</h2>
+      <form hx-post="/connexions/{{ endpoint.id }}/update" hx-target="#content" hx-select="#content" hx-swap="outerHTML" class="space-y-4">
+        {{ csrf() }}
+        <div>
+          <label class="label" for="name">Nom</label>
+          <input id="name" name="name" class="input" maxlength="100" value="{{ endpoint.name }}">
+        </div>
+        <div>
+          <label class="label" for="url">URL</label>
+          <input id="url" name="url" type="url" class="input" maxlength="2048" value="{{ endpoint.url }}">
+          <p class="hint">Modifier l'URL réinitialise le statut du test.</p>
+        </div>
+        <fieldset>
+          <legend class="label mb-2">Événements</legend>
+          <div class="grid gap-1 sm:grid-cols-2">
+            {% for ev in WEBHOOK_EVENTS %}
+            <label class="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="events" value="{{ ev }}"
+                     {% if ev in endpoint.events %}checked{% endif %}>
+              <span>{{ EVENT_LABELS.get(ev, ev) }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+        <div>
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="include_health_data" value="1"
+                   {% if endpoint.include_health_data %}checked{% endif %}>
+            Inclure les données de mobilité (PMR)
+          </label>
+        </div>
+        <div>
+          <label class="label" for="custom_headers_raw">En-têtes personnalisés</label>
+          <textarea id="custom_headers_raw" name="custom_headers_raw" class="input font-mono text-xs" rows="3" maxlength="2000"
+                    placeholder="Authorization: Bearer mon-token"></textarea>
+          <label class="mt-1 flex items-center gap-2 text-xs text-brand-muted">
+            <input type="checkbox" name="clear_custom_headers" value="1">
+            Effacer les en-têtes existants
+          </label>
+        </div>
+        <div class="flex justify-end">
+          <button type="submit" class="btn-primary btn-sm">Enregistrer</button>
+        </div>
+      </form>
+    </section>
+    {% endif %}
+
+    {# Derniers envois #}
+    <section class="card p-0" aria-labelledby="h-deliveries">
+      <div class="flex items-center justify-between p-4">
+        <h2 id="h-deliveries" class="text-lg font-semibold">Derniers envois</h2>
+        <a href="/envois?endpoint_id={{ endpoint.id }}" class="text-sm text-brand-accent hover:underline">Voir tout</a>
+      </div>
+      {% if deliveries %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-brand-border">
+          <thead>
+            <tr>
+              <th class="th">ID</th>
+              <th class="th">Événement</th>
+              <th class="th">Statut</th>
+              <th class="th">Tentatives</th>
+              <th class="th">Date</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-brand-border">
+            {% for d in deliveries %}
+            <tr>
+              <td class="td font-mono text-xs">
+                <a href="/envois/{{ d.id }}" class="text-brand-accent hover:underline">{{ d.id[:16] }}…</a>
+              </td>
+              <td class="td text-xs">{{ EVENT_LABELS.get(d.event_type, d.event_type) }}</td>
+              <td class="td">{{ delivery_badge(d.status) }}</td>
+              <td class="td text-center text-xs">{{ d.attempt_count }}</td>
+              <td class="td whitespace-nowrap text-xs text-brand-muted">{{ d.created_at|ago }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="px-4 pb-4 text-sm text-brand-muted">Aucun envoi enregistré.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  {# ── Colonne d'actions ── #}
+  <div class="space-y-4">
+
+    {# Test #}
+    {% if endpoint.status != 'archived' %}
+    <section class="card space-y-3" aria-labelledby="h-test">
+      <h2 id="h-test" class="font-semibold">Tester la connexion</h2>
+      <p class="text-sm text-brand-muted">Envoie un événement <code>webhook.test</code> et met à jour le statut de test.</p>
+      <form hx-post="/connexions/{{ endpoint.id }}/test" hx-target="#content" hx-select="#content" hx-swap="outerHTML">
+        {{ csrf() }}
+        <button type="submit" class="btn-secondary w-full">Envoyer un test</button>
+      </form>
+    </section>
+    {% endif %}
+
+    {# Activer / Désactiver #}
+    {% if endpoint.status == 'inactive' %}
+    <section class="card space-y-3" aria-labelledby="h-activate">
+      <h2 id="h-activate" class="font-semibold">Activer</h2>
+      {% if can_activate %}
+      <p class="text-sm text-green-700">Test réussi récemment. Vous pouvez activer la connexion.</p>
+      <form hx-post="/connexions/{{ endpoint.id }}/activate" hx-target="#content" hx-select="#content" hx-swap="outerHTML">
+        {{ csrf() }}
+        <button type="submit" class="btn-primary w-full">Activer</button>
+      </form>
+      {% else %}
+      <p class="text-sm text-brand-muted">Un test doit réussir dans les 24 h avant l'activation.</p>
+      {% endif %}
+    </section>
+    {% elif endpoint.status == 'active' %}
+    <section class="card space-y-3">
+      <h2 class="font-semibold">Désactiver</h2>
+      <p class="text-sm text-brand-muted">Les envois en cours se terminent ; aucun nouvel envoi n'est créé.</p>
+      <form hx-post="/connexions/{{ endpoint.id }}/deactivate" hx-target="#content" hx-select="#content" hx-swap="outerHTML"
+            hx-confirm="Désactiver la connexion {{ endpoint.name }} ?">
+        {{ csrf() }}
+        <button type="submit" class="btn-secondary w-full">Désactiver</button>
+      </form>
+    </section>
+    {% endif %}
+
+    {# Rotation du secret (step-up) #}
+    {% if endpoint.status != 'archived' %}
+    <section class="card space-y-3" aria-labelledby="h-rotate">
+      <h2 id="h-rotate" class="font-semibold">Rotation du secret</h2>
+      <p class="text-sm text-brand-muted">Génère un nouveau secret. Votre mot de passe est demandé.</p>
+      <form hx-post="/connexions/{{ endpoint.id }}/rotate-secret" hx-target="#content" hx-select="#content" hx-swap="outerHTML"
+            data-stepup="true" class="space-y-2">
+        {{ csrf() }}
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox" name="urgent" value="1">
+          Urgente (invalide l'ancien secret immédiatement)
+        </label>
+        <button type="submit" class="btn-secondary w-full">Renouveler le secret</button>
+      </form>
+    </section>
+    {% endif %}
+
+    {# Archiver (step-up) #}
+    {% if endpoint.status != 'archived' %}
+    <section class="card space-y-3 border border-red-100">
+      <h2 class="font-semibold text-red-700">Zone dangereuse</h2>
+      <form hx-post="/connexions/{{ endpoint.id }}/archive" hx-target="body"
+            hx-confirm="Archiver définitivement la connexion {{ endpoint.name }} ? Cette action est irréversible."
+            data-stepup="true">
+        {{ csrf() }}
+        <button type="submit" class="btn-danger w-full btn-sm">Archiver la connexion</button>
+      </form>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

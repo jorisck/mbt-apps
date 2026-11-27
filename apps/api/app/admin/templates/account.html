@@ -49,13 +49,13 @@
     <h2 id="h-sessions" class="text-lg">Sessions actives</h2>
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-brand-border">
-        <thead><tr><th class="th">Appareil</th><th class="th">IP</th><th class="th">Connectée</th><th class="th">Dernière activité</th><th class="th"><span class="sr-only">Action</span></th></tr></thead>
+        <thead><tr><th class="th">Appareil</th><th class="th hidden md:table-cell">IP</th><th class="th hidden md:table-cell">Connectée</th><th class="th">Dernière activité</th><th class="th"><span class="sr-only">Action</span></th></tr></thead>
         <tbody class="divide-y divide-brand-border">
           {% for s in sessions %}
           <tr>
             <td class="td max-w-xs truncate text-xs">{{ (s.user_agent or 'Inconnu')[:80] }}{% if s.id == current_session_id %} <span class="badge-confirmed">cette session</span>{% endif %}</td>
-            <td class="td text-xs">{{ s.ip or '' }}</td>
-            <td class="td text-xs">{{ s.created_at|brussels }}</td>
+            <td class="td hidden text-xs md:table-cell">{{ s.ip or '' }}</td>
+            <td class="td hidden text-xs md:table-cell">{{ s.created_at|brussels }}</td>
             <td class="td text-xs">{{ s.last_seen_at|ago }}</td>
             <td class="td">
               {% if s.id != current_session_id %}

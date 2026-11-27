@@ -6,7 +6,7 @@ import hashlib
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, Response
+from fastapi import APIRouter, Depends, Header, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import ClientInfo, get_client, version_tuple
@@ -14,8 +14,10 @@ from app.db import get_db, session_scope
 from app.domain.actors import Actor
 from app.domain.demandes.schemas import MIN_ELAPSED_MS, DemandeCreate, DemandeCreated
 from app.domain.demandes.service import create_demande
+from app.domain.passengers import service as pax
 from app.domain.settings.service import get_setting
 from app.errors import ApiProblem
+from app.models import Passenger
 from app.security import ratelimit
 
 router = APIRouter(prefix="/demandes", tags=["demandes"])
@@ -44,10 +46,27 @@ async def _enforce_limits(client: ClientInfo, email: str) -> None:
             raise ApiProblem(429, "rate_limited", "Trop de demandes.", headers={"Retry-After": "3600"})
 
 
+async def _optional_passenger(request: Request, db: AsyncSession) -> Passenger | None:
+    """Extrait le passager authentifié si un jeton Bearer valide est présent ; None sinon."""
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return None
+    token = auth[len("Bearer "):]
+    try:
+        passenger_id = pax.decode_access_token(token)
+    except pax.PassengerError:
+        return None
+    passenger = await db.get(Passenger, passenger_id)
+    if passenger is None or passenger.status != "active":
+        return None
+    return passenger
+
+
 @router.post("", response_model=DemandeCreated, status_code=201, summary="Créer une demande")
 async def create(
     body: DemandeCreate,
     response: Response,
+    request: Request,
     client: Annotated[ClientInfo, Depends(get_client)],
     db: Annotated[AsyncSession, Depends(get_db)],
     idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
@@ -66,12 +85,23 @@ async def create(
         raise _generic_refusal()
     await _enforce_limits(client, body.passenger.email)
 
+    # Jeton client facultatif : si présent, l'e-mail doit être vérifié (§18.3 point 8).
+    passenger = await _optional_passenger(request, db)
+    passenger_id = None
+    actor = Actor.guest(client.ip)
+    if passenger is not None:
+        if passenger.email_verified_at is None:
+            raise ApiProblem(422, "email_not_verified", "Vérifiez votre adresse e-mail avant de faire une demande.")
+        passenger_id = passenger.id
+        actor = Actor.passenger(passenger.id, client.ip)
+
     demande, created = await create_demande(
         db,
         body,
         origin=client.origin,
         idempotency_key=key,
-        actor=Actor.guest(client.ip),
+        actor=actor,
+        passenger_id=passenger_id,
     )
     if not created:
         response.status_code = 200  # rejeu idempotent : on renvoie la demande déjà créée

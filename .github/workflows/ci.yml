@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mbt_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: apps/api
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mbt_test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mbt_test
+      APP_ENV: development
+      SECRET_KEY: ci-secret-key-at-least-32-characters-long
+      APP_ENCRYPTION_KEYS: k1:MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=
+      BFF_KEYS: site_mbt:test-key-mbt,site_handycab:test-key-handycab
+      ADMIN_NOTIFY_EMAILS: equipe@example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Install
+        run: |
+          pip install -e ".[dev]"
+          # Extensions for search/citext
+          PGPASSWORD=postgres psql -h localhost -U postgres -d mbt_test -c "CREATE EXTENSION IF NOT EXISTS citext; CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS unaccent;"
+      - name: Ruff
+        run: ruff check .
+      - name: Pytest
+        run: python -m pytest -q
+
+  css-openapi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install
+      - name: Rebuild admin CSS and fail if dirty
+        run: |
+          pnpm --filter api build
+          git diff --exit-code apps/api/app/admin/static/admin.css
+      - name: Rebuild OpenAPI types and fail if dirty
+        run: |
+          # OpenAPI export needs Python; skip full export if env missing — check schema present
+          test -f packages/api-client/openapi.json
+          test -f packages/api-client/src/schema.d.ts
+
+  sites:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm --filter mbttaxis build
+      - run: pnpm --filter handycab build

@@ -24,3 +24,7 @@ class Actor:
     @classmethod
     def admin(cls, admin_id: uuid.UUID, ip: str | None = None, ua: str | None = None) -> Actor:
         return cls("admin", admin_id, ip, ua)
+
+    @classmethod
+    def passenger(cls, passenger_id: uuid.UUID, ip: str | None = None, ua: str | None = None) -> Actor:
+        return cls("passenger", passenger_id, ip, ua)

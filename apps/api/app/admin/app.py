@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.admin.deps import AuthRequired, csrf_protect
-from app.admin.routes import account, admins, auth, dashboard, demandes, settings_audit
+from app.admin.routes import account, admins, auth, dashboard, demandes, passagers, settings_audit, webhooks
 from app.admin.templating import ADMIN_DIR, render
 from app.errors import ApiProblem, problem_response
 from app.middleware import ADMIN_HEADERS, BodyLimitMiddleware, SecurityHeadersMiddleware
@@ -71,7 +71,7 @@ def create_admin_app() -> FastAPI:
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, title="MBT – gestion")
 
     protected = APIRouter(dependencies=[Depends(csrf_protect)])  # csrf_protect exige la session
-    for module in (dashboard, demandes, admins, settings_audit, account):
+    for module in (dashboard, demandes, passagers, admins, settings_audit, account, webhooks):
         protected.include_router(module.router)
 
     app.include_router(auth.router)

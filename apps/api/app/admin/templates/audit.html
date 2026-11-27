@@ -14,7 +14,7 @@
 </div>
 
 <form method="get" action="/audit-log" class="card mb-4 flex flex-wrap items-end gap-3">
-  <div>
+  <div class="w-full sm:w-auto">
     <label class="label" for="action">Action commençant par</label>
     <input id="action" name="action" class="input" value="{{ action }}" placeholder="auth., demande., admin., settings.">
   </div>
@@ -25,16 +25,16 @@
 <div class="card p-0">
   <div class="overflow-x-auto">
     <table class="min-w-full divide-y divide-brand-border">
-      <thead><tr><th class="th">N°</th><th class="th">Date</th><th class="th">Acteur</th><th class="th">Action</th><th class="th">Objet</th><th class="th">IP</th><th class="th">Détails</th></tr></thead>
+      <thead><tr><th class="th hidden sm:table-cell">N°</th><th class="th">Date</th><th class="th">Acteur</th><th class="th">Action</th><th class="th hidden md:table-cell">Objet</th><th class="th hidden md:table-cell">IP</th><th class="th">Détails</th></tr></thead>
       <tbody class="divide-y divide-brand-border">
         {% for entry, name in rows %}
         <tr>
-          <td class="td text-xs text-brand-muted">{{ entry.id }}</td>
+          <td class="td hidden text-xs text-brand-muted sm:table-cell">{{ entry.id }}</td>
           <td class="td whitespace-nowrap">{{ entry.occurred_at|brussels }}</td>
           <td class="td">{{ name or entry.actor_type }}</td>
-          <td class="td font-mono text-xs">{{ entry.action }}</td>
-          <td class="td text-xs">{{ entry.entity_type or '' }} {{ (entry.entity_id or '')[:8] }}</td>
-          <td class="td text-xs text-brand-muted">{{ entry.ip or '' }}</td>
+          <td class="td break-all font-mono text-xs">{{ entry.action }}</td>
+          <td class="td hidden text-xs md:table-cell">{{ entry.entity_type or '' }} {{ (entry.entity_id or '')[:8] }}</td>
+          <td class="td hidden text-xs text-brand-muted md:table-cell">{{ entry.ip or '' }}</td>
           <td class="td max-w-sm break-words font-mono text-xs text-brand-muted">{% if entry.details %}{{ entry.details|tojson }}{% endif %}</td>
         </tr>
         {% else %}

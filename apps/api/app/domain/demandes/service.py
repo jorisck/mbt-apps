@@ -24,6 +24,7 @@ from app.domain.demandes.schemas import DemandeCreate, NeedsIn
 from app.domain.emails.outbox import enqueue_email
 from app.domain.places import resolve_address
 from app.domain.settings.service import get_setting
+from app.domain.webhooks.outbox import enqueue_webhook_event
 from app.errors import ApiProblem, BusinessRule, Conflict, PreconditionFailed
 from app.models import Demande, DemandeEvent, DemandeNote
 from app.timeutil import (
@@ -352,6 +353,12 @@ async def transition(
         db, actor, "demande.status_changed", "demande", d.id, {"reference": d.reference, "from": previous, "to": to}
     )
     await enqueue_status_emails(db, d, previous, actor)
+
+    # Webhooks sortants (lot L4) : déclenché pour les transitions OUTBOUND_EVENT.
+    outbound_event = sm.OUTBOUND_EVENT.get(to)
+    if outbound_event:
+        await enqueue_webhook_event(db, d, outbound_event)
+
     await db.flush()
     return d
 

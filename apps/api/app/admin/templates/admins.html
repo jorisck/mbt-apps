@@ -1,14 +1,48 @@
 {% extends "base.html" %}
 {% from "_macros.html" import csrf %}
 {% block title %}Administrateurs{% endblock %}
+
+{# Boutons d'action d'un administrateur (utilisés par la carte mobile et par le tableau). #}
+{% macro admin_actions(a) %}
+<div class="flex flex-wrap gap-2 md:justify-end">
+  {% if a.status == 'disabled' %}
+  <form hx-post="/admins/{{ a.id }}/enable" hx-target="#content" hx-select="#content" hx-swap="outerHTML">{{ csrf() }}<button class="btn-secondary btn-sm" type="submit">Réactiver</button></form>
+  {% else %}
+  <form hx-post="/admins/{{ a.id }}/revoke-sessions" hx-target="#content" hx-select="#content" hx-swap="outerHTML" hx-confirm="Fermer toutes les sessions de {{ a.full_name }} ?">{{ csrf() }}<button class="btn-secondary btn-sm" type="submit">Fermer les sessions</button></form>
+  <form hx-post="/admins/{{ a.id }}/disable" hx-target="#content" hx-select="#content" hx-swap="outerHTML" hx-confirm="Désactiver le compte de {{ a.full_name }} ?">{{ csrf() }}<button class="btn-danger btn-sm" type="submit">Désactiver</button></form>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro admin_status(a) %}
+{% if a.status == 'active' %}<span class="badge-completed">Actif</span>
+{% elif a.status == 'invited' %}<span class="badge-received">Invité</span>
+{% else %}<span class="badge-cancelled">Désactivé</span>{% endif %}
+{% endmacro %}
+
 {% block content %}
 <h1 class="mb-4 text-2xl">Administrateurs</h1>
 {% if error %}<p class="alert-error mb-4" role="alert">{{ error }}</p>{% endif %}
 {% if ok %}<p class="alert-ok mb-4" role="status">{{ ok }}</p>{% endif %}
 
 <div class="grid gap-6 lg:grid-cols-3">
-  <section class="card p-0 lg:col-span-2">
-    <div class="overflow-x-auto">
+  <section class="card p-0 lg:col-span-2" aria-label="Liste des administrateurs">
+    {# Téléphone : une carte par administrateur #}
+    <ul class="divide-y divide-brand-border md:hidden">
+      {% for a in admins %}
+      <li class="space-y-2 p-4">
+        <div class="flex items-start justify-between gap-2">
+          <p class="font-medium">{{ a.full_name }}{% if a.id == auth.admin.id %} <span class="text-xs text-brand-muted">(vous)</span>{% endif %}</p>
+          <span class="shrink-0">{{ admin_status(a) }}</span>
+        </div>
+        <p class="break-all text-sm">{{ a.email }}</p>
+        <p class="text-xs text-brand-muted">Dernière connexion : {{ a.last_login_at|brussels if a.last_login_at else '—' }}</p>
+        {% if a.id != auth.admin.id %}{{ admin_actions(a) }}{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {# Tablette et ordinateur : tableau #}
+    <div class="hidden overflow-x-auto md:block">
       <table class="min-w-full divide-y divide-brand-border">
         <thead>
           <tr><th class="th">Nom</th><th class="th">E-mail</th><th class="th">Statut</th><th class="th">Dernière connexion</th><th class="th"><span class="sr-only">Actions</span></th></tr>
@@ -18,24 +52,9 @@
           <tr>
             <td class="td font-medium">{{ a.full_name }}{% if a.id == auth.admin.id %} <span class="text-xs text-brand-muted">(vous)</span>{% endif %}</td>
             <td class="td">{{ a.email }}</td>
-            <td class="td">
-              {% if a.status == 'active' %}<span class="badge-completed">Actif</span>
-              {% elif a.status == 'invited' %}<span class="badge-received">Invité</span>
-              {% else %}<span class="badge-cancelled">Désactivé</span>{% endif %}
-            </td>
+            <td class="td">{{ admin_status(a) }}</td>
             <td class="td text-xs text-brand-muted">{{ a.last_login_at|brussels if a.last_login_at else '—' }}</td>
-            <td class="td">
-              {% if a.id != auth.admin.id %}
-              <div class="flex flex-wrap justify-end gap-2">
-                {% if a.status == 'disabled' %}
-                <form hx-post="/admins/{{ a.id }}/enable" hx-target="#content" hx-select="#content" hx-swap="outerHTML">{{ csrf() }}<button class="btn-secondary btn-sm" type="submit">Réactiver</button></form>
-                {% else %}
-                <form hx-post="/admins/{{ a.id }}/revoke-sessions" hx-target="#content" hx-select="#content" hx-swap="outerHTML" hx-confirm="Fermer toutes les sessions de {{ a.full_name }} ?">{{ csrf() }}<button class="btn-secondary btn-sm" type="submit">Fermer les sessions</button></form>
-                <form hx-post="/admins/{{ a.id }}/disable" hx-target="#content" hx-select="#content" hx-swap="outerHTML" hx-confirm="Désactiver le compte de {{ a.full_name }} ?">{{ csrf() }}<button class="btn-danger btn-sm" type="submit">Désactiver</button></form>
-                {% endif %}
-              </div>
-              {% endif %}
-            </td>
+            <td class="td">{% if a.id != auth.admin.id %}{{ admin_actions(a) }}{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>

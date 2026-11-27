@@ -44,6 +44,14 @@ export const reservation = {
     consent:
       "J’accepte que MBT utilise ces informations pour traiter ma demande.",
   },
+  /** Bandeau Handycab affiché quand le service Taxi PMR est sélectionné */
+  pmrHandycab: {
+    eyebrow: "Handycab par MBT",
+    title: "Gérer vos réservations PMR directement sur Handycab",
+    text: "Créez un compte ou connectez-vous pour suivre vos courses PMR, depuis le web ou l’application.",
+    cta: "Se connecter sur Handycab",
+    href: site.handycabCompteConnexion,
+  },
   urgent: {
     title: "Besoin d’une réponse rapide ?",
     text: "Pour une demande urgente pendant les heures d’ouverture, appelez directement notre centrale.",

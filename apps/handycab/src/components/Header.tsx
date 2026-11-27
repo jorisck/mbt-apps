@@ -7,7 +7,12 @@ import { useEffect, useState } from "react";
 import { nav, site } from "../../content/site";
 import { Icon } from "./Icon";
 
-export function Header() {
+interface HeaderProps {
+  /** Prénom du passager connecté, ou undefined si non connecté. */
+  firstName?: string;
+}
+
+export function Header({ firstName }: HeaderProps = {}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -89,13 +94,12 @@ export function Header() {
               Appeler
             </a>
             <a
-              href={site.bookingUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-brand-yellow px-4 py-2 text-[13px] font-bold text-brand-charcoal transition-colors hover:bg-brand-yellow-dark"
+              href="/compte"
+              className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-brand-yellow px-4 py-2 text-[13px] font-bold text-brand-charcoal transition-colors hover:bg-brand-yellow-dark"
+              title={firstName ? `Mon compte — ${firstName}` : "Mon compte"}
             >
-              Réserver
-              <Icon name="arrow" />
+              <i className="fa fa-user-circle-o" aria-hidden />
+              {firstName ?? "Connexion"}
             </a>
           </nav>
 
@@ -143,14 +147,12 @@ export function Header() {
                 Appeler {site.phone}
               </a>
               <a
-                href={site.bookingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/compte"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-yellow px-4 py-3 text-[14px] font-bold text-brand-charcoal"
                 onClick={() => setOpen(false)}
               >
-                Réserver un taxi
-                <Icon name="arrow" />
+                <i className="fa fa-user-circle-o" aria-hidden />
+                {firstName ? `Mon compte — ${firstName}` : "Mon compte / Connexion"}
               </a>
             </nav>
           </div>

@@ -20,8 +20,11 @@ from starlette.responses import Response
 from starlette.routing import Host
 
 from app.admin.app import create_admin_app
+from app.api.v1 import auth as v1_auth
 from app.api.v1 import config as v1_config
 from app.api.v1 import demandes as v1_demandes
+from app.api.v1 import me as v1_me
+from app.api.v1 import messages as v1_messages
 from app.config import settings
 from app.db import dispose_engine
 from app.errors import ApiProblem, api_problem_handler, problem_response, validation_handler
@@ -48,7 +51,10 @@ def create_public_app() -> FastAPI:
         openapi_url="/openapi.json" if docs else None,
     )
     app.include_router(v1_demandes.router, prefix="/v1")
+    app.include_router(v1_messages.router, prefix="/v1")
     app.include_router(v1_config.router, prefix="/v1")
+    app.include_router(v1_auth.router, prefix="/v1")
+    app.include_router(v1_me.router, prefix="/v1")
     app.add_api_route("/healthz", healthz, methods=["GET"], include_in_schema=False)
 
     app.add_exception_handler(ApiProblem, api_problem_handler)

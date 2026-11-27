@@ -9,9 +9,9 @@ const channels = [
     icon: "calc" as const,
     title: "Plateforme web",
     body: "Réservez sans installer d’application.",
-    href: site.bookingUrl,
-    cta: "Ouvrir",
-    external: true,
+    href: "/demande",
+    cta: "Réserver",
+    external: false,
   },
   {
     icon: "phone" as const,
@@ -93,9 +93,7 @@ export function BookingPanel() {
           </p>
         </div>
         <a
-          href={site.bookingUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/demande"
           className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-yellow px-6 py-3 text-[13px] font-bold text-brand-charcoal shadow-[0_4px_14px_rgba(249,205,26,0.3)] transition-all hover:-translate-y-0.5 hover:bg-brand-yellow-dark"
         >
           <span>Réserver maintenant</span>

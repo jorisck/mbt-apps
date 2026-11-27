@@ -6,12 +6,34 @@
 <span class="badge-{{ status|replace('_', '-') }}">{{ status|status_label }}</span>
 {%- endmacro %}
 
-{# Tableau compact de demandes (tableau de bord). `stale` : minutes avant alerte. #}
+{# Carte d'une demande, pour téléphone (sous 768 px). Le lien « stretched » rend toute la carte cliquable
+   sans imbriquer de lien : le téléphone reste un lien `tel:` indépendant. #}
+{% macro request_card(d, stale=0, show_origin=False) -%}
+{% set is_stale = stale and d.status == 'received' and (d.created_at|minutes_since) >= stale %}
+<article class="relative rounded-lg border border-brand-border p-3 {% if is_stale %}border-amber-300 bg-amber-50{% else %}bg-white{% endif %}">
+  <div class="flex items-start justify-between gap-2">
+    <a class="font-semibold text-brand-accent after:absolute after:inset-0" href="/demandes/{{ d.id }}">{{ d.reference }}</a>
+    <span class="shrink-0">{{ badge(d.status) }}{% if d.closed_by == 'system' %} <span class="text-xs text-brand-muted">auto</span>{% endif %}</span>
+  </div>
+  <p class="mt-1 text-sm font-medium">{{ d.passenger_first_name }} {{ d.passenger_last_name }}</p>
+  <a class="relative z-10 inline-flex min-h-8 items-center text-xs text-brand-muted hover:underline" href="tel:{{ d.passenger_phone|tel }}">{{ d.passenger_phone }}</a>
+  <p class="mt-1 text-sm"><strong>{{ d.pickup_at|brussels }}</strong>{% if d.return_at %} <span class="text-xs text-brand-muted">· retour {{ d.return_at|brussels }}</span>{% endif %}</p>
+  <p class="mt-1 break-words text-xs text-brand-muted">{{ d.pickup_address.formatted }}<br>→ {{ d.dropoff_address.formatted }}</p>
+  <p class="mt-2 text-xs {% if is_stale %}font-semibold text-amber-800{% else %}text-brand-muted{% endif %}">
+    Reçue {{ d.created_at|ago }}{% if show_origin %} · {{ d.origin|origin_label }}{% endif %}
+  </p>
+</article>
+{%- endmacro %}
+
+{# Demandes du tableau de bord : cartes sur téléphone, tableau dès 768 px. `stale` : minutes avant alerte. #}
 {% macro request_table(items, empty_text, stale=0) -%}
 {% if not items %}
 <p class="text-sm text-brand-muted">{{ empty_text }}</p>
 {% else %}
-<div class="overflow-x-auto">
+<div class="space-y-3 md:hidden">
+  {% for d in items %}{{ request_card(d, stale) }}{% endfor %}
+</div>
+<div class="hidden overflow-x-auto md:block">
   <table class="min-w-full divide-y divide-brand-border">
     <thead>
       <tr>

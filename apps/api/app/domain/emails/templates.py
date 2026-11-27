@@ -12,7 +12,10 @@ from dataclasses import dataclass
 from typing import Any
 
 # Gabarits dont le contexte contient un lien à usage unique : effacé après l'envoi.
-SENSITIVE_TEMPLATES = frozenset({"admin_invitation", "admin_password_reset"})
+SENSITIVE_TEMPLATES = frozenset({
+    "admin_invitation", "admin_password_reset",
+    "passenger_verify", "passenger_password_reset",
+})
 
 PASSENGER_TEMPLATES = frozenset({"demande_received", "demande_confirmed", "demande_refused", "demande_cancelled"})
 
@@ -120,6 +123,48 @@ _PASSENGER: dict[str, dict[str, tuple[str, str]]] = {
             "A question? Call us on {phone}.\n\nMBT Taxis",
         ),
     },
+    # --- Compte passager (lot L8, §18.3) : vérification d'e-mail -------------------------
+    "passenger_verify": {
+        "fr": (
+            "Vérifiez votre adresse e-mail HandyCab / MBT Taxis",
+            "Bonjour {name},\n\nMerci de créer votre compte. Confirmez votre adresse e-mail "
+            "avec ce lien, valable 24 heures :\n{link}\n\nSi vous n'avez pas créé de compte, "
+            "ignorez ce message.",
+        ),
+        "nl": (
+            "Bevestig uw e-mailadres HandyCab / MBT Taxis",
+            "Beste {name},\n\nBedankt voor het aanmaken van uw account. Bevestig uw e-mailadres "
+            "via deze link, geldig gedurende 24 uur:\n{link}\n\nHeeft u geen account aangemaakt, "
+            "negeer dan dit bericht.",
+        ),
+        "en": (
+            "Verify your HandyCab / MBT Taxis email address",
+            "Hello {name},\n\nThank you for creating your account. Confirm your email address "
+            "using this link, valid for 24 hours:\n{link}\n\nIf you did not create an account, "
+            "please ignore this message.",
+        ),
+    },
+    # --- Compte passager (lot L8, §18.3) : réinitialisation de mot de passe --------------
+    "passenger_password_reset": {
+        "fr": (
+            "Réinitialisation de votre mot de passe HandyCab / MBT Taxis",
+            "Bonjour {name},\n\nPour choisir un nouveau mot de passe, utilisez ce lien, "
+            "valable 1 heure :\n{link}\n\nSi vous n'êtes pas à l'origine de cette demande, "
+            "ignorez ce message : votre mot de passe reste inchangé.",
+        ),
+        "nl": (
+            "Wachtwoord opnieuw instellen — HandyCab / MBT Taxis",
+            "Beste {name},\n\nGebruik deze link om een nieuw wachtwoord te kiezen, "
+            "geldig gedurende 1 uur:\n{link}\n\nHeeft u dit niet aangevraagd, negeer dan "
+            "dit bericht: uw wachtwoord blijft ongewijzigd.",
+        ),
+        "en": (
+            "Reset your HandyCab / MBT Taxis password",
+            "Hello {name},\n\nTo set a new password, use this link, valid for 1 hour:\n"
+            "{link}\n\nIf you did not request this, please ignore this message: your "
+            "password will remain unchanged.",
+        ),
+    },
 }
 
 _REASON_PREFIX = {"fr": " Motif : ", "nl": " Reden: ", "en": " Reason: "}
@@ -137,6 +182,12 @@ _TEAM: dict[str, tuple[str, str]] = {
         "Demande {ref} annulée par le passager",
         "Le passager a annulé la demande {ref} prévue le {when}.\n\n{route}\n\nPassager : {name}"
         "\nTéléphone : {phone}\n\nVoir la demande : {link}",
+    ),
+    "message_new": (
+        "Nouveau message : {kind} ({origin})",
+        "Un formulaire du site vient d'être envoyé.\n\nType : {kind}\nOrigine : {origin}\n"
+        "Sujet : {subject}\n\nDe : {name}\nTéléphone : {phone}\nE-mail : {email}\nLangue : "
+        "{language}\n\nMessage :\n{body}\n\nDétails :\n{details}",
     ),
     "admin_invitation": (
         "Invitation à l'espace de gestion HandyCab / MBT",
@@ -171,6 +222,20 @@ _TEAM: dict[str, tuple[str, str]] = {
         "Votre accès à l'espace de gestion a été désactivé",
         "Bonjour {name},\n\nVotre accès à l'espace de gestion a été désactivé. Contactez un "
         "administrateur si vous pensez qu'il s'agit d'une erreur.",
+    ),
+    # --- Tâches planifiées (§12) ---------------------------------------------------------
+    "demande_stale_alert": (
+        "⚠ Demande non traitée depuis {minutes} min : {ref}",
+        "La demande {ref} de {name} (prise en charge : {when}) attend depuis plus de {minutes} "
+        "minutes et n'a pas encore été traitée.\n\nTraiter la demande : {link}",
+    ),
+    "daily_digest": (
+        "Récapitulatif quotidien HandyCab / MBT Taxis",
+        "Bonjour,\n\nVoici le récapitulatif de la journée.\n\n"
+        "Demandes reçues non traitées (heure passée) : {pending_past}\n"
+        "Demandes en attente depuis plus de {stale_minutes} min : {stale_count}\n"
+        "E-mails en échec : {failed_emails}\n\n"
+        "Accéder à l'espace de gestion : {link}",
     ),
 }
 

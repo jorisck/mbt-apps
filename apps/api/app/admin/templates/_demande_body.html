@@ -51,14 +51,14 @@
         <button class="btn-primary" type="submit">{% if to == 'confirmed' %}Confirmer{% elif to == 'completed' %}Marquer terminée{% else %}{{ to|status_label }}{% endif %}</button>
       </form>
       {% else %}
-      <details class="rounded-lg border border-brand-border bg-brand-surface p-3">
+      <details class="w-full rounded-lg border border-brand-border bg-brand-surface p-3 sm:w-auto">
         <summary class="cursor-pointer text-sm font-semibold">
           {% if d.status in ('completed', 'not_completed') %}Corriger : {{ to|status_label }}
           {% elif to == 'refused' %}Refuser
           {% elif to == 'cancelled' %}Annuler
           {% else %}Marquer « {{ to|status_label }} »{% endif %}
         </summary>
-        <form hx-post="{{ base }}/transition" hx-target="#detail" hx-swap="innerHTML" class="mt-3 w-72 space-y-3">
+        <form hx-post="{{ base }}/transition" hx-target="#detail" hx-swap="innerHTML" class="mt-3 w-full space-y-3 sm:w-72">
           {{ csrf() }}
           <input type="hidden" name="revision" value="{{ d.revision }}">
           <input type="hidden" name="to" value="{{ to }}">
@@ -88,7 +88,7 @@
 <div class="grid gap-6 lg:grid-cols-2">
   <section class="card space-y-3" aria-labelledby="h-passenger">
     <h2 id="h-passenger" class="text-lg">Passager</h2>
-    <dl class="grid grid-cols-[8rem_1fr] gap-y-2 text-sm">
+    <dl class="grid grid-cols-[7rem_minmax(0,1fr)] gap-y-2 text-sm sm:grid-cols-[8rem_minmax(0,1fr)] [&>dd]:break-words">
       <dt class="text-brand-muted">Nom</dt><dd>{{ d.passenger_first_name }} {{ d.passenger_last_name }}</dd>
       <dt class="text-brand-muted">Téléphone</dt><dd><a class="text-brand-accent hover:underline" href="tel:{{ d.passenger_phone|tel }}">{{ d.passenger_phone }}</a></dd>
       <dt class="text-brand-muted">E-mail</dt><dd>{% if d.passenger_email %}<a class="text-brand-accent hover:underline" href="mailto:{{ d.passenger_email }}">{{ d.passenger_email }}</a>{% else %}—{% endif %}</dd>
@@ -100,7 +100,7 @@
 
   <section class="card space-y-3" aria-labelledby="h-trip">
     <h2 id="h-trip" class="text-lg">Trajet</h2>
-    <dl class="grid grid-cols-[8rem_1fr] gap-y-2 text-sm">
+    <dl class="grid grid-cols-[7rem_minmax(0,1fr)] gap-y-2 text-sm sm:grid-cols-[8rem_minmax(0,1fr)] [&>dd]:break-words">
       <dt class="text-brand-muted">Prise en charge</dt><dd><strong>{{ d.pickup_at|brussels }}</strong></dd>
       <dt class="text-brand-muted">Départ</dt><dd>{{ d.pickup_address.formatted }}{% if d.pickup_address.get('verified') is false %} <span class="text-xs text-amber-800">(adresse non vérifiée)</span>{% endif %}</dd>
       {% if d.pickup_instructions %}<dt class="text-brand-muted">Précisions</dt><dd class="whitespace-pre-line">{{ d.pickup_instructions }}</dd>{% endif %}
@@ -116,7 +116,7 @@
     <h2 id="h-needs" class="text-lg">Besoins et remarques</h2>
     {% if needs %}
     <p class="text-xs text-brand-muted">Donnée de santé : consentement recueilli le {{ d.health_consent_at|brussels if d.health_consent_at else '—' }}.</p>
-    <dl class="grid grid-cols-[8rem_1fr] gap-y-2 text-sm">
+    <dl class="grid grid-cols-[7rem_minmax(0,1fr)] gap-y-2 text-sm sm:grid-cols-[8rem_minmax(0,1fr)] [&>dd]:break-words">
       <dt class="text-brand-muted">Aide à la mobilité</dt><dd>{{ needs.mobility_aid|mobility_label }}</dd>
       {% if needs.stays_in_wheelchair %}<dt class="text-brand-muted">Fauteuil</dt><dd>Reste dans son fauteuil</dd>{% endif %}
       {% if needs.companions %}<dt class="text-brand-muted">Accompagnants</dt><dd>{{ needs.companions }}</dd>{% endif %}
@@ -194,6 +194,7 @@
 {% if detail.emails %}
 <section class="card mt-6" aria-labelledby="h-emails">
   <h2 id="h-emails" class="mb-3 text-lg">E-mails</h2>
+  <div class="overflow-x-auto">
   <table class="min-w-full text-sm">
     <thead><tr><th class="th">Modèle</th><th class="th">Destinataire</th><th class="th">État</th><th class="th">Envoi</th></tr></thead>
     <tbody class="divide-y divide-brand-border">
@@ -211,5 +212,6 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
 </section>
 {% endif %}

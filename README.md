@@ -35,10 +35,11 @@ L'espace de gestion n'est **pas** une application Next.js : il est rendu côté 
 | L1 | Socle : config, base, migrations, chiffrement, audit chaîné, routage par hôte, `/healthz`, Procfile | fait |
 | L2 | Authentification des admins : Argon2id, sessions, CSRF, réauthentification, verrouillage, invitations, mot de passe oublié, CLI | fait — **sans 2FA** (voir ci-dessous) |
 | L3 | Demandes : `POST /v1/demandes`, machine à états, liste / recherche / fiche / notes, e-mails Resend (file + worker) | fait |
-| L4 | Webhooks sortants (Taxiger) | à faire |
-| L5 | Tâches planifiées (clôture auto, purge RGPD), paramètres avancés | à faire |
-| L6 | Écrans passagers dans l'admin | à faire |
-| L8 | Compte client + client API partagé (`packages/api-client`) | à faire |
+| L4 | Webhooks sortants (Taxiger) : connexions, outbox, signature, SSRF, journal, admin | fait |
+| L5 | Tâches planifiées (clôture auto, alertes, purge RGPD, digest) | fait |
+| L6 | Écrans passagers dans l'admin | fait |
+| L7 | CI, docs d'exploitation, suite d'acceptation manuelle | fait (déploiement Heroku réel à configurer avec les comptes MBT) |
+| L8 | Compte client + `packages/api-client` + pages `/compte` sur les sites + branchement formulaires | fait |
 
 **Écart assumé avec la spécification : pas de double authentification (2FA) dans cette version.** Connexion e-mail + mot de passe ; les actions sensibles (inviter / désactiver un admin, paramètres, export CSV) exigent de **ressaisir le mot de passe** (valable 10 minutes). Le 2FA TOTP pourra être ajouté ensuite sans changer le reste.
 

@@ -262,6 +262,13 @@ h5 {
   }
 }
 
+/* Side-by-side fields (e.g. Prénom | Nom): keep label above input so
+   the 14rem label column doesn't crush the input on tablet widths. */
+.form-fields-pair > .form-field {
+  grid-template-columns: 1fr;
+  align-items: stretch;
+}
+
 .form-field label {
   font-weight: 400;
   color: var(--color-body);

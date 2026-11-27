@@ -1,4 +1,4 @@
-{% from "_macros.html" import badge %}
+{% from "_macros.html" import badge, request_card %}
 <div class="card p-0">
   <div class="flex items-center justify-between border-b border-brand-border px-4 py-3 text-sm">
     <span><strong>{{ page.total }}</strong> demande{{ 's' if page.total > 1 }}</span>
@@ -7,7 +7,10 @@
   {% if not page.items %}
   <p class="px-4 py-10 text-center text-sm text-brand-muted">Aucune demande ne correspond à ces critères.</p>
   {% else %}
-  <div class="overflow-x-auto">
+  <div class="space-y-3 p-3 md:hidden">
+    {% for d in page.items %}{{ request_card(d, 0, true) }}{% endfor %}
+  </div>
+  <div class="hidden overflow-x-auto md:block">
     <table class="min-w-full divide-y divide-brand-border">
       <thead>
         <tr>
@@ -37,7 +40,7 @@
   </div>
   {% endif %}
   {% if page.pages > 1 %}
-  <nav class="flex items-center justify-between border-t border-brand-border px-4 py-3" aria-label="Pagination">
+  <nav class="flex items-center justify-between gap-2 border-t border-brand-border px-4 py-3" aria-label="Pagination">
     {% set base = base_qs ~ '&' if base_qs else '' %}
     {% if page.page > 1 %}
     {% set prev_url = '/demandes?' ~ base ~ 'page=' ~ (page.page - 1) %}

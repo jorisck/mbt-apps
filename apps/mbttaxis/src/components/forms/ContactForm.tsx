@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { contact } from "../../../content/contact";
 import { submitContact, type FormState } from "../../app/actions/forms";
 
@@ -8,6 +8,7 @@ const initial: FormState = { ok: false };
 
 export function ContactForm() {
   const [state, action, pending] = useActionState(submitContact, initial);
+  const [startedAt] = useState(() => Date.now());
 
   if (state.ok) {
     return (
@@ -20,12 +21,23 @@ export function ContactForm() {
 
   return (
     <form action={action} className="space-y-3">
-      <div className="form-field">
-        <label htmlFor="name">Nom et prénom *</label>
-        <input id="name" name="name" required />
-        {state.errors?.name?.[0] ? (
-          <p className="form-error">{state.errors.name[0]}</p>
-        ) : null}
+      <input type="hidden" name="elapsedMs" value={Math.max(0, Date.now() - startedAt)} />
+      <input type="text" name="hp" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
+      <div className="form-fields-pair grid gap-3 md:grid-cols-2">
+        <div className="form-field">
+          <label htmlFor="firstName">Prénom *</label>
+          <input id="firstName" name="firstName" required />
+          {state.errors?.firstName?.[0] ? (
+            <p className="form-error">{state.errors.firstName[0]}</p>
+          ) : null}
+        </div>
+        <div className="form-field">
+          <label htmlFor="lastName">Nom *</label>
+          <input id="lastName" name="lastName" required />
+          {state.errors?.lastName?.[0] ? (
+            <p className="form-error">{state.errors.lastName[0]}</p>
+          ) : null}
+        </div>
       </div>
       <div className="form-field">
         <label htmlFor="phone">Numéro de téléphone</label>
@@ -62,14 +74,13 @@ export function ContactForm() {
       <div className="form-field form-field--consent">
         <label className="flex items-start gap-3 !normal-case">
           <input type="checkbox" name="consent" value="on" required className="mt-1" />
-          <span>
-            J’accepte que MBT utilise ces informations pour traiter ma demande.
-          </span>
+          <span>J’accepte que MBT utilise ces informations pour traiter ma demande.</span>
         </label>
         {state.errors?.consent?.[0] ? (
           <p className="form-error">{state.errors.consent[0]}</p>
         ) : null}
       </div>
+      {state.message ? <p className="form-error">{state.message}</p> : null}
       <button type="submit" className="btn btn-primary" disabled={pending}>
         {pending ? "Envoi…" : contact.form.submit}
       </button>

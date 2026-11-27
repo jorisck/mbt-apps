@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf %}
+{% block title %}Journal des envois{% endblock %}
+
+{% macro delivery_badge(s) %}
+{% if s == 'succeeded' %}<span class="badge-completed">Réussi</span>
+{% elif s == 'failed' %}<span class="badge-cancelled">Échoué</span>
+{% elif s == 'pending' %}<span class="badge-received">En attente</span>
+{% elif s == 'sending' %}<span class="badge-received">En cours</span>
+{% else %}<span class="badge-cancelled">Abandonné</span>{% endif %}
+{% endmacro %}
+
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+  <div class="flex items-center gap-3">
+    <a href="/connexions" class="text-sm text-brand-muted hover:underline">← Connexions</a>
+    <h1 class="text-2xl">Journal des envois</h1>
+  </div>
+  {# Relance en masse #}
+  <form hx-post="/envois-bulk-retry" hx-target="body"
+        hx-confirm="Relancer tous les envois échoués {% if f_endpoint_id %}pour cette connexion{% endif %} ?">
+    {{ csrf() }}
+    {% if f_endpoint_id %}<input type="hidden" name="endpoint_id" value="{{ f_endpoint_id }}">{% endif %}
+    <button type="submit" class="btn-secondary btn-sm">Relancer les échoués</button>
+  </form>
+</div>
+
+{# Filtres #}
+<form method="get" action="/envois" class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+  <div>
+    <label class="label text-xs" for="f-endpoint">Connexion</label>
+    <select id="f-endpoint" name="endpoint_id" class="input text-sm">
+      <option value="">Toutes</option>
+      {% for ep in endpoints %}
+      <option value="{{ ep.id }}" {% if f_endpoint_id == ep.id|string %}selected{% endif %}>{{ ep.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="label text-xs" for="f-status">Statut</label>
+    <select id="f-status" name="status" class="input text-sm">
+      <option value="">Tous</option>
+      {% for key, label in DELIVERY_STATUS_LABELS.items() %}
+      <option value="{{ key }}" {% if f_status == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="label text-xs" for="f-event">Événement</label>
+    <select id="f-event" name="event_type" class="input text-sm">
+      <option value="">Tous</option>
+      {% for ev in WEBHOOK_EVENTS %}
+      <option value="{{ ev }}" {% if f_event_type == ev %}selected{% endif %}>{{ EVENT_LABELS.get(ev, ev) }}</option>
+      {% endfor %}
+      <option value="webhook.test" {% if f_event_type == 'webhook.test' %}selected{% endif %}>webhook.test</option>
+    </select>
+  </div>
+  <button type="submit" class="btn-primary btn-sm">Filtrer</button>
+  {% if f_endpoint_id or f_status or f_event_type %}
+  <a href="/envois" class="btn-secondary btn-sm">Réinitialiser</a>
+  {% endif %}
+</form>
+
+{# Tableau #}
+{% if page.items %}
+<section class="card p-0" aria-label="Liste des envois">
+  {# Mobile #}
+  <ul class="divide-y divide-brand-border md:hidden">
+    {% for d in page.items %}
+    <li class="space-y-1 p-4">
+      <div class="flex items-start justify-between gap-2">
+        <a href="/envois/{{ d.id }}" class="font-mono text-xs text-brand-accent hover:underline">{{ d.id }}</a>
+        {{ delivery_badge(d.status) }}
+      </div>
+      <p class="text-sm">{{ EVENT_LABELS.get(d.event_type, d.event_type) }}</p>
+      <p class="text-xs text-brand-muted">{{ d.attempt_count }} tentative(s) · {{ d.created_at|ago }}</p>
+    </li>
+    {% endfor %}
+  </ul>
+  {# Tableau ≥ 768 px #}
+  <div class="hidden overflow-x-auto md:block">
+    <table class="min-w-full divide-y divide-brand-border">
+      <thead>
+        <tr>
+          <th class="th">ID</th>
+          <th class="th">Connexion</th>
+          <th class="th">Événement</th>
+          <th class="th">Statut</th>
+          <th class="th">Tentatives</th>
+          <th class="th">Date</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-brand-border">
+        {% for d in page.items %}
+        <tr>
+          <td class="td font-mono text-xs">
+            <a href="/envois/{{ d.id }}" class="text-brand-accent hover:underline">{{ d.id[:20] }}…</a>
+          </td>
+          <td class="td text-xs text-brand-muted">
+            {% set ep = endpoints | selectattr('id', 'equalto', d.endpoint_id) | first | default(None) %}
+            {% if ep %}<a href="/connexions/{{ ep.id }}" class="hover:underline">{{ ep.name }}</a>
+            {% else %}—{% endif %}
+          </td>
+          <td class="td text-xs">{{ EVENT_LABELS.get(d.event_type, d.event_type) }}</td>
+          <td class="td">{{ delivery_badge(d.status) }}</td>
+          <td class="td text-center text-xs">{{ d.attempt_count }}</td>
+          <td class="td whitespace-nowrap text-xs text-brand-muted">{{ d.created_at|ago }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# Pagination #}
+  {% if page.pages > 1 %}
+  <div class="flex items-center justify-between border-t border-brand-border px-4 py-3 text-sm">
+    <span class="text-brand-muted">Page {{ page.page }} / {{ page.pages }} ({{ page.total }} envois)</span>
+    <div class="flex gap-2">
+      {% if page.page > 1 %}
+      <a href="?endpoint_id={{ f_endpoint_id }}&status={{ f_status }}&event_type={{ f_event_type }}&page={{ page.page - 1 }}" class="btn-secondary btn-sm">← Préc.</a>
+      {% endif %}
+      {% if page.page < page.pages %}
+      <a href="?endpoint_id={{ f_endpoint_id }}&status={{ f_status }}&event_type={{ f_event_type }}&page={{ page.page + 1 }}" class="btn-secondary btn-sm">Suiv. →</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% else %}
+<div class="card py-12 text-center">
+  <p class="text-brand-muted">Aucun envoi correspondant aux filtres.</p>
+</div>
+{% endif %}
+{% endblock %}

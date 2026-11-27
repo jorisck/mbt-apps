@@ -7,6 +7,40 @@
     return meta ? meta.getAttribute('content') : '';
   };
 
+  /* --- Menu burger (sous 1024 px) ------------------------------------------------------ */
+  var navToggle = document.getElementById('nav-toggle');
+  var navPanel = document.getElementById('nav-panel');
+  var desktop = window.matchMedia('(min-width: 1024px)');
+
+  function setNav(open) {
+    navPanel.classList.toggle('hidden', !open);
+    navPanel.classList.toggle('flex', open);
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    navToggle.setAttribute('aria-label', open ? 'Fermer le menu' : 'Menu');
+  }
+
+  if (navToggle && navPanel) {
+    navToggle.addEventListener('click', function () {
+      setNav(navToggle.getAttribute('aria-expanded') !== 'true');
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && navToggle.getAttribute('aria-expanded') === 'true') {
+        setNav(false);
+        navToggle.focus();
+      }
+    });
+    document.addEventListener('click', function (event) {
+      var open = navToggle.getAttribute('aria-expanded') === 'true';
+      if (open && !navPanel.contains(event.target) && !navToggle.contains(event.target)) { setNav(false); }
+    });
+    /* Retour à la barre du bureau : on remet l'état fermé pour repartir proprement au prochain rétrécissement. */
+    desktop.addEventListener('change', function () { setNav(false); });
+  }
+
+  /* --- Filtres repliables : ouverts d'office sur ordinateur, repliés sur téléphone ----- */
+  var moreFilters = document.getElementById('filters-more');
+  if (moreFilters && window.matchMedia('(min-width: 768px)').matches) { moreFilters.open = true; }
+
   /* --- Réauthentification (step-up) : fenêtre de saisie du mot de passe ---------------- */
   var dialog = document.getElementById('stepup-dialog');
   var form = document.getElementById('stepup-form');

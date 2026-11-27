@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf, badge %}
+{% block title %}{{ p.first_name }} {{ p.last_name }}{% endblock %}
+
+{% macro passenger_status_badge(p) %}
+{% if p.status == 'active' %}<span class="badge-completed">Actif</span>
+{% elif p.status == 'pending' %}<span class="badge-received">En attente de vérification</span>
+{% elif p.status == 'disabled' %}<span class="badge-cancelled">Désactivé</span>
+{% else %}<span class="badge-cancelled">Anonymisé</span>{% endif %}
+{% endmacro %}
+
+{% block content %}
+<p class="mb-3 text-sm"><a class="text-brand-accent hover:underline" href="/passagers">← Passagers</a></p>
+
+{% if error %}<p class="alert-error mb-4" role="alert">{{ error }}</p>{% endif %}
+{% if ok %}<p class="alert-ok mb-4" role="status">{{ ok }}</p>{% endif %}
+
+<div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+  <div>
+    <h1 class="flex flex-wrap items-center gap-3 text-2xl">
+      {{ p.first_name }} {{ p.last_name }}
+      {{ passenger_status_badge(p) }}
+    </h1>
+    <p class="mt-1 text-sm text-brand-muted">
+      Inscrit le {{ p.created_at|brussels }}
+      {% if p.last_login_at %} · Dernière connexion : {{ p.last_login_at|brussels }}{% endif %}
+    </p>
+  </div>
+
+  {# Actions #}
+  {% if p.status != 'anonymized' %}
+  <div class="flex flex-wrap gap-2">
+    {% if p.status == 'disabled' %}
+    <form hx-post="/passagers/{{ p.id }}/enable" hx-target="#content" hx-select="#content" hx-swap="outerHTML">
+      {{ csrf() }}
+      <button class="btn-secondary btn-sm" type="submit">Réactiver</button>
+    </form>
+    {% else %}
+    <form hx-post="/passagers/{{ p.id }}/disable" hx-target="#content" hx-select="#content" hx-swap="outerHTML"
+          hx-confirm="Désactiver le compte de {{ p.first_name }} {{ p.last_name }} et révoquer tous ses jetons ?">
+      {{ csrf() }}
+      <button class="btn-danger btn-sm" type="submit">Désactiver</button>
+    </form>
+    {% endif %}
+
+    {% if p.email_verified_at is none %}
+    <form hx-post="/passagers/{{ p.id }}/resend-verification" hx-target="#content" hx-select="#content" hx-swap="outerHTML">
+      {{ csrf() }}
+      <button class="btn-secondary btn-sm" type="submit">Renvoyer l'e-mail de vérification</button>
+    </form>
+    {% endif %}
+
+    <a href="/passagers/{{ p.id }}/export" class="btn-secondary btn-sm" data-export-link>Exporter (RGPD)</a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="grid gap-6 lg:grid-cols-3">
+
+  {# --- Profil (lecture seule) --- #}
+  <section class="card space-y-3 lg:col-span-1" aria-labelledby="h-profil">
+    <h2 id="h-profil" class="text-lg">Profil</h2>
+    <dl class="space-y-2 text-sm">
+      <div>
+        <dt class="label">E-mail</dt>
+        <dd class="break-all">{{ p.email }}
+          {% if p.email_verified_at %}
+          <span class="text-xs text-brand-muted">(vérifié le {{ p.email_verified_at|brussels }})</span>
+          {% else %}
+          <span class="text-xs text-amber-700">(non vérifié)</span>
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="label">Téléphone</dt>
+        <dd><a class="text-brand-accent hover:underline" href="tel:{{ p.phone|tel }}">{{ p.phone or '—' }}</a></dd>
+      </div>
+      <div>
+        <dt class="label">Langue</dt>
+        <dd>{{ {'fr': 'Français', 'nl': 'Nederlands', 'en': 'English'}.get(p.language, p.language) }}</dd>
+      </div>
+      {% if p.health_consent_at and p.default_needs %}
+      <div>
+        <dt class="label">Besoins par défaut</dt>
+        <dd class="text-xs text-brand-muted">
+          Consentement donné le {{ p.health_consent_at|brussels }}
+          <ul class="mt-1 list-disc pl-4 space-y-0.5">
+            {% for key, val in p.default_needs.items() %}
+            {% if val %}<li>{{ key|mobility_label }}</li>{% endif %}
+            {% endfor %}
+          </ul>
+        </dd>
+      </div>
+      {% endif %}
+    </dl>
+
+    {# Adresses favorites #}
+    {% if detail.addresses %}
+    <h3 class="pt-2 text-sm font-semibold">Adresses favorites</h3>
+    <ul class="space-y-2 text-sm">
+      {% for addr in detail.addresses %}
+      <li>
+        <p class="font-medium">{{ addr.label }}</p>
+        <p class="text-xs text-brand-muted">{{ addr.address.get('formatted', '') }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+
+  {# --- Demandes --- #}
+  <section class="card p-0 lg:col-span-2" aria-labelledby="h-demandes">
+    <div class="border-b border-brand-border px-4 py-3">
+      <h2 id="h-demandes" class="text-lg">Demandes (20 dernières)</h2>
+    </div>
+    {% if not detail.demandes %}
+    <p class="p-4 text-sm text-brand-muted">Aucune demande.</p>
+    {% else %}
+    {# Téléphone : cartes #}
+    <ul class="divide-y divide-brand-border md:hidden">
+      {% for d in detail.demandes %}
+      <li class="p-3 text-sm">
+        <div class="flex items-center justify-between gap-2">
+          <a class="font-semibold text-brand-accent hover:underline" href="/demandes/{{ d.id }}">{{ d.reference }}</a>
+          {{ badge(d.status) }}
+        </div>
+        <p class="mt-1 text-brand-muted">{{ d.pickup_at|brussels }}</p>
+        <p class="text-xs text-brand-muted">{{ d.pickup_address.get('formatted', '') }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+    {# Tablette / ordinateur : tableau #}
+    <div class="hidden overflow-x-auto md:block">
+      <table class="min-w-full divide-y divide-brand-border">
+        <thead>
+          <tr>
+            <th class="th">Référence</th>
+            <th class="th">Statut</th>
+            <th class="th">Service</th>
+            <th class="th">Prise en charge</th>
+            <th class="th">Départ</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-brand-border">
+          {% for d in detail.demandes %}
+          <tr>
+            <td class="td">
+              <a class="font-semibold text-brand-accent hover:underline" href="/demandes/{{ d.id }}">{{ d.reference }}</a>
+            </td>
+            <td class="td">{{ badge(d.status) }}</td>
+            <td class="td text-sm">{{ d.service|service_label }}</td>
+            <td class="td whitespace-nowrap text-sm">{{ d.pickup_at|brussels }}</td>
+            <td class="td max-w-xs text-xs text-brand-muted">{{ d.pickup_address.get('formatted', '') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </section>
+
+  {# --- Zone danger : anonymisation --- #}
+  {% if p.status != 'anonymized' %}
+  <section class="card space-y-3 border-red-200 lg:col-span-3" aria-labelledby="h-danger">
+    <h2 id="h-danger" class="text-lg text-red-700">Zone dangereuse</h2>
+    <p class="text-sm text-brand-muted">
+      L'anonymisation est <strong>irréversible</strong>. Elle supprime toutes les données personnelles
+      du compte et de ses demandes. Elle est bloquée tant qu'une demande reçue ou confirmée à venir
+      existe.
+    </p>
+    <form hx-post="/passagers/{{ p.id }}/anonymize" hx-target="#content" hx-select="#content" hx-swap="outerHTML"
+          class="flex flex-wrap items-end gap-3">
+      {{ csrf() }}
+      <div>
+        <label class="label" for="confirm-anonymize">
+          Saisissez <strong>ANONYMISER</strong> pour confirmer
+        </label>
+        <input id="confirm-anonymize" name="confirm" class="input w-48" maxlength="20"
+               placeholder="ANONYMISER" autocomplete="off">
+      </div>
+      <button class="btn-danger btn-sm" type="submit" data-stepup>Anonymiser</button>
+    </form>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}

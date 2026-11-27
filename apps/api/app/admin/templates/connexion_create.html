@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf %}
+{% block title %}Nouvelle connexion{% endblock %}
+
+{% block content %}
+<div class="mb-4 flex items-center gap-3">
+  <a href="/connexions" class="text-sm text-brand-muted hover:underline">← Connexions</a>
+  <h1 class="text-2xl">Nouvelle connexion webhook</h1>
+</div>
+
+{# Indicateur d'étapes #}
+<nav aria-label="Étapes" class="mb-6 flex items-center gap-2 text-sm">
+  {% for n, label in [(1, 'URL et nom'), (2, 'Événements'), (3, 'Confirmation')] %}
+  {% if loop.first %}{% else %}<span class="text-brand-muted">›</span>{% endif %}
+  <span class="{% if step == n %}font-semibold text-brand-dark{% else %}text-brand-muted{% endif %}">
+    {{ n }}. {{ label }}
+  </span>
+  {% endfor %}
+</nav>
+
+{% if error %}
+<p class="alert-error mb-4" role="alert">{{ error }}</p>
+{% endif %}
+
+{# ── Étape 1 ── #}
+{% if step == 1 %}
+<form hx-post="/connexions/nouveau/step2" hx-target="#content" hx-select="#content" hx-swap="outerHTML" class="card space-y-4 max-w-xl">
+  {{ csrf() }}
+  <div>
+    <label class="label" for="name">Nom de la connexion</label>
+    <input id="name" name="name" class="input" maxlength="100" required value="{{ name|default('') }}" placeholder="Mon intégration">
+    <p class="hint">Identifiant lisible, affiché dans l'interface.</p>
+  </div>
+  <div>
+    <label class="label" for="url">URL de destination (HTTPS)</label>
+    <input id="url" name="url" type="url" class="input" maxlength="2048" required value="{{ url|default('') }}" placeholder="https://hooks.exemple.com/webhook">
+    <p class="hint">Doit être joignable depuis Internet (HTTPS uniquement, port 443).</p>
+  </div>
+  <div class="flex justify-end pt-2">
+    <button type="submit" class="btn-primary">Suivant →</button>
+  </div>
+</form>
+
+{# ── Étape 2 ── #}
+{% elif step == 2 %}
+<form hx-post="/connexions/nouveau/step3" hx-target="#content" hx-select="#content" hx-swap="outerHTML" class="card space-y-5 max-w-xl">
+  {{ csrf() }}
+  <input type="hidden" name="name" value="{{ name }}">
+  <input type="hidden" name="url" value="{{ url }}">
+
+  <fieldset>
+    <legend class="label mb-2">Événements à recevoir <span class="text-red-600">*</span></legend>
+    <div class="space-y-2">
+      {% for ev in WEBHOOK_EVENTS %}
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="events" value="{{ ev }}"
+               {% if events is defined and ev in events %}checked{% endif %}>
+        <span>{{ EVENT_LABELS.get(ev, ev) }}</span>
+        <span class="text-xs text-brand-muted font-mono">{{ ev }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <div>
+    <label class="flex items-center gap-2 text-sm">
+      <input type="checkbox" name="include_health_data" value="1"
+             {% if include_health_data %}checked{% endif %}>
+      Inclure les données de mobilité (PMR)
+    </label>
+    <p class="hint mt-1">À n'activer que si votre intégration en a besoin et que vous avez obtenu le consentement explicite du passager.</p>
+  </div>
+
+  <div>
+    <label class="label" for="custom_headers_raw">En-têtes personnalisés (optionnel)</label>
+    <textarea id="custom_headers_raw" name="custom_headers_raw" class="input font-mono text-xs" rows="4" maxlength="2000"
+              placeholder="Authorization: Bearer mon-token&#10;X-Mon-Header: valeur">{{ custom_headers_raw|default('') }}</textarea>
+    <p class="hint">Une paire « Clé: Valeur » par ligne. Transmis à chaque envoi.</p>
+  </div>
+
+  <div class="flex justify-between pt-2">
+    <a href="/connexions/nouveau" class="btn-secondary">← Retour</a>
+    <button type="submit" class="btn-primary">Suivant →</button>
+  </div>
+</form>
+
+{# ── Étape 3 — Récapitulatif #}
+{% elif step == 3 %}
+<form hx-post="/connexions" hx-target="#content" hx-select="#content" hx-swap="outerHTML" class="card space-y-5 max-w-xl">
+  {{ csrf() }}
+  <input type="hidden" name="name" value="{{ name }}">
+  <input type="hidden" name="url" value="{{ url }}">
+  {% for ev in events %}
+  <input type="hidden" name="events" value="{{ ev }}">
+  {% endfor %}
+  <input type="hidden" name="include_health_data" value="{{ '1' if include_health_data else '0' }}">
+  <input type="hidden" name="custom_headers_raw" value="{{ custom_headers_raw|default('') }}">
+
+  <h2 class="text-lg font-semibold">Récapitulatif</h2>
+
+  <dl class="space-y-3 text-sm">
+    <div class="grid grid-cols-[8rem_1fr] gap-2">
+      <dt class="font-medium text-brand-muted">Nom</dt>
+      <dd>{{ name }}</dd>
+    </div>
+    <div class="grid grid-cols-[8rem_1fr] gap-2">
+      <dt class="font-medium text-brand-muted">URL</dt>
+      <dd class="break-all font-mono text-xs">{{ url }}</dd>
+    </div>
+    <div class="grid grid-cols-[8rem_1fr] gap-2">
+      <dt class="font-medium text-brand-muted">Événements</dt>
+      <dd>
+        {% if events %}
+        <ul class="space-y-0.5">
+          {% for ev in events %}<li class="font-mono text-xs">{{ ev }}</li>{% endfor %}
+        </ul>
+        {% else %}<span class="text-brand-muted">Aucun</span>{% endif %}
+      </dd>
+    </div>
+    <div class="grid grid-cols-[8rem_1fr] gap-2">
+      <dt class="font-medium text-brand-muted">Données PMR</dt>
+      <dd>{{ 'Oui' if include_health_data else 'Non' }}</dd>
+    </div>
+    {% if headers_preview %}
+    <div class="grid grid-cols-[8rem_1fr] gap-2">
+      <dt class="font-medium text-brand-muted">En-têtes</dt>
+      <dd>
+        <ul class="space-y-0.5">
+          {% for k, v in headers_preview.items() %}
+          <li class="font-mono text-xs">{{ k }}: ***</li>
+          {% endfor %}
+        </ul>
+      </dd>
+    </div>
+    {% endif %}
+  </dl>
+
+  <div class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
+    <strong>Important :</strong> Le secret de signature sera affiché <strong>une seule fois</strong>
+    après la création. Copiez-le immédiatement et configurez-le dans votre intégration.
+  </div>
+
+  <div class="flex justify-between pt-2">
+    <button type="button" onclick="history.back()" class="btn-secondary">← Retour</button>
+    <button type="submit" class="btn-primary">Créer la connexion</button>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

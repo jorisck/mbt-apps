@@ -11,7 +11,8 @@
     "api:server": "pnpm --filter api dev:server",
     "api:worker": "pnpm --filter api dev:worker",
     "api:migrate": "pnpm --filter api migrate",
-    "api:test": "pnpm --filter api test"
+    "api:test": "pnpm --filter api test",
+    "openapi": "pnpm --filter api exec conda run -n mbt-api python -m app.cli export-openapi --out ../../packages/api-client/openapi.json && pnpm --filter @mbt/api-client generate"
   },
   "devDependencies": {
     "turbo": "^2.11.13",

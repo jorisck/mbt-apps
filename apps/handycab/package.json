@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.9",
+    "@mbt/api-client": "workspace:^",
     "font-awesome": "4.7.0",
     "motion": "^14.14.0",
     "next": "16.4.6",

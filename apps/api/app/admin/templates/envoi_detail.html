@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf %}
+{% block title %}Envoi {{ delivery.id[:16] }}{% endblock %}
+
+{% macro delivery_badge(s) %}
+{% if s == 'succeeded' %}<span class="badge-completed">Réussi</span>
+{% elif s == 'failed' %}<span class="badge-cancelled">Échoué</span>
+{% elif s == 'pending' %}<span class="badge-received">En attente</span>
+{% elif s == 'sending' %}<span class="badge-received">En cours</span>
+{% else %}<span class="badge-cancelled">Abandonné</span>{% endif %}
+{% endmacro %}
+
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <a href="/envois{% if endpoint %}?endpoint_id={{ endpoint.id }}{% endif %}" class="text-sm text-brand-muted hover:underline">← Envois</a>
+  <h1 class="break-all font-mono text-lg">{{ delivery.id }}</h1>
+  {{ delivery_badge(delivery.status) }}
+</div>
+
+{% if flash_ok %}<p class="alert-ok mb-4" role="status">{{ flash_ok }}</p>{% endif %}
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+
+    {# Infos de l'envoi #}
+    <section class="card space-y-3" aria-labelledby="h-info">
+      <h2 id="h-info" class="text-lg font-semibold">Informations</h2>
+      <dl class="grid gap-3 text-sm sm:grid-cols-2">
+        <div>
+          <dt class="font-medium text-brand-muted">Connexion</dt>
+          <dd class="mt-0.5">
+            {% if endpoint %}
+            <a href="/connexions/{{ endpoint.id }}" class="text-brand-accent hover:underline">{{ endpoint.name }}</a>
+            {% else %}—{% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt class="font-medium text-brand-muted">Événement</dt>
+          <dd class="mt-0.5 font-mono text-xs">{{ delivery.event_type }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium text-brand-muted">Statut</dt>
+          <dd class="mt-0.5">{{ delivery_badge(delivery.status) }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium text-brand-muted">Déclencheur</dt>
+          <dd class="mt-0.5 text-xs">{{ delivery.trigger }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium text-brand-muted">Tentatives</dt>
+          <dd class="mt-0.5">{{ delivery.attempt_count }}</dd>
+        </div>
+        <div>
+          <dt class="font-medium text-brand-muted">Prochaine tentative</dt>
+          <dd class="mt-0.5 text-xs text-brand-muted">
+            {% if delivery.next_attempt_at and delivery.status == 'pending' %}
+            {{ delivery.next_attempt_at|ago }}
+            {% else %}—{% endif %}
+          </dd>
+        </div>
+        {% if delivery.last_error %}
+        <div>
+          <dt class="font-medium text-brand-muted">Dernière erreur</dt>
+          <dd class="mt-0.5 font-mono text-xs text-red-700">{{ delivery.last_error }}</dd>
+        </div>
+        {% endif %}
+        {% if delivery.external_id %}
+        <div>
+          <dt class="font-medium text-brand-muted">ID externe</dt>
+          <dd class="mt-0.5 font-mono text-xs">{{ delivery.external_id }}</dd>
+        </div>
+        {% endif %}
+        <div>
+          <dt class="font-medium text-brand-muted">Créé</dt>
+          <dd class="mt-0.5 text-xs text-brand-muted">{{ delivery.created_at|ago }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    {# Payload #}
+    <section class="card space-y-2" aria-labelledby="h-payload">
+      <h2 id="h-payload" class="font-semibold">Payload</h2>
+      <pre class="max-h-64 overflow-auto rounded bg-brand-surface p-3 text-xs font-mono">{{ delivery.payload | tojson(indent=2) }}</pre>
+    </section>
+
+    {# Tentatives #}
+    <section class="card p-0" aria-labelledby="h-attempts">
+      <h2 id="h-attempts" class="p-4 text-lg font-semibold">Tentatives</h2>
+      {% if attempts %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-brand-border">
+          <thead>
+            <tr>
+              <th class="th">Date</th>
+              <th class="th">Déclencheur</th>
+              <th class="th">HTTP</th>
+              <th class="th">IP</th>
+              <th class="th">Durée</th>
+              <th class="th">Erreur</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-brand-border">
+            {% for a in attempts %}
+            <tr>
+              <td class="td whitespace-nowrap text-xs text-brand-muted">{{ a.created_at|ago }}</td>
+              <td class="td text-xs">{{ a.trigger }}</td>
+              <td class="td text-center text-xs {% if a.http_status and a.http_status < 300 %}text-green-700{% elif a.http_status %}text-red-700{% endif %}">
+                {{ a.http_status or '—' }}
+              </td>
+              <td class="td font-mono text-xs text-brand-muted">{{ a.resolved_ip or '—' }}</td>
+              <td class="td whitespace-nowrap text-xs text-brand-muted">{{ a.duration_ms }}ms</td>
+              <td class="td text-xs {% if a.error_type %}text-red-700{% endif %}">{{ a.error_type or '—' }}</td>
+            </tr>
+            {% if a.response_excerpt %}
+            <tr>
+              <td colspan="6" class="px-4 pb-2">
+                <pre class="max-h-20 overflow-auto rounded bg-brand-surface px-2 py-1 text-xs font-mono text-brand-muted">{{ a.response_excerpt }}</pre>
+              </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="px-4 pb-4 text-sm text-brand-muted">Aucune tentative enregistrée.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  {# Actions #}
+  <div class="space-y-4">
+    {% if delivery.status in ['failed', 'abandoned'] %}
+    <section class="card space-y-3">
+      <h2 class="font-semibold">Relancer</h2>
+      <p class="text-sm text-brand-muted">Replanifie l'envoi immédiatement.</p>
+      <form hx-post="/envois/{{ delivery.id }}/retry" hx-target="body">
+        {{ csrf() }}
+        <button type="submit" class="btn-primary w-full">Relancer</button>
+      </form>
+    </section>
+    {% endif %}
+
+    {% if delivery.status in ['pending', 'failed'] %}
+    <section class="card space-y-3">
+      <h2 class="font-semibold">Abandonner</h2>
+      <p class="text-sm text-brand-muted">Marque l'envoi comme abandonné — aucune nouvelle tentative.</p>
+      <form hx-post="/envois/{{ delivery.id }}/abandon" hx-target="body"
+            hx-confirm="Abandonner cet envoi ?">
+        {{ csrf() }}
+        <button type="submit" class="btn-danger w-full btn-sm">Abandonner</button>
+      </form>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

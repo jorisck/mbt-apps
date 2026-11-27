@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Poppins, Raleway } from "next/font/google";
+import { Suspense } from "react";
 import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
+import { HeaderServer } from "../components/HeaderServer";
 import { JsonLd } from "../components/JsonLd";
 import { site } from "../../content/site";
 import "./globals.css";
@@ -81,7 +83,9 @@ export default function RootLayout({
           Aller au contenu
         </a>
         <JsonLd />
-        <Header />
+        <Suspense fallback={<Header />}>
+          <HeaderServer />
+        </Suspense>
         <main id="contenu">{children}</main>
         <Footer />
       </body>

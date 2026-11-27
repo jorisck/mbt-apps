@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     public_api_host: str = "api.localhost"
     # URL publique de l'admin (liens des e-mails). Déduite de ADMIN_HOST si vide.
     admin_base_url: str = ""
+    # URL publique du compte client (liens dans les e-mails passagers). Déduite de mbttaxis_url si vide.
+    client_base_url: str = ""
 
     # Liens affichés dans l'espace de gestion (bouton « En savoir plus » et pied de page).
     handycab_url: str = "https://www.handycab.be"
@@ -100,6 +102,13 @@ class Settings(BaseSettings):
         if self.is_local:
             return f"http://{self.admin_host}:8000"
         return f"https://{self.admin_host}"
+
+    @property
+    def client_url(self) -> str:
+        """URL racine des pages compte client (liens dans les e-mails passagers)."""
+        if self.client_base_url:
+            return self.client_base_url.rstrip("/")
+        return self.mbttaxis_url.rstrip("/")
 
     @property
     def notify_emails(self) -> list[str]:

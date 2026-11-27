@@ -15,6 +15,7 @@ export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export function Header() {
   useEffect(() => {
     setOpen(false);
     setServicesOpen(false);
+    setMobileServicesOpen(false);
   }, [pathname]);
 
   const isServicesActive =
@@ -135,7 +137,12 @@ export function Header() {
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-            onClick={() => setOpen((v) => !v)}
+            onClick={() =>
+              setOpen((v) => {
+                if (v) setMobileServicesOpen(false);
+                return !v;
+              })
+            }
           >
             <i className={`fa ${open ? "fa-times" : "fa-bars"}`} aria-hidden />
           </button>
@@ -151,25 +158,47 @@ export function Header() {
                 if ("children" in link && link.children) {
                   return (
                     <div key={link.href} className="pt-1">
-                      <Link
-                        href={link.href}
-                        className={`block rounded-full px-4 py-3 font-medium ${
-                          isServicesActive ? "bg-brand text-white" : "text-body"
+                      <button
+                        type="button"
+                        className={`flex w-full items-center justify-between rounded-full px-4 py-3 text-left font-medium ${
+                          isServicesActive || mobileServicesOpen
+                            ? "bg-brand text-white"
+                            : "text-body"
                         }`}
+                        aria-expanded={mobileServicesOpen}
+                        aria-controls="mobile-services-menu"
+                        onClick={() => setMobileServicesOpen((v) => !v)}
                       >
                         {link.label}
-                      </Link>
-                      <div className="ml-2 mt-1 flex flex-col gap-0.5 border-l border-border pl-3">
-                        {link.children.map((child) => (
+                        <i
+                          className={`fa fa-angle-down text-sm transition-transform ${
+                            mobileServicesOpen ? "rotate-180" : ""
+                          }`}
+                          aria-hidden
+                        />
+                      </button>
+                      {mobileServicesOpen ? (
+                        <div
+                          id="mobile-services-menu"
+                          className="ml-2 mt-1 flex flex-col gap-0.5 border-l border-border pl-3"
+                        >
                           <Link
-                            key={child.href}
-                            href={child.href}
-                            className="rounded-full px-3 py-2 text-sm text-body"
+                            href={link.href}
+                            className="rounded-full px-3 py-2 text-sm font-medium text-body"
                           >
-                            {child.label}
+                            Tous les services
                           </Link>
-                        ))}
-                      </div>
+                          {link.children.map((child) => (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              className="rounded-full px-3 py-2 text-sm text-body"
+                            >
+                              {child.label}
+                            </Link>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
                   );
                 }

@@ -4,7 +4,7 @@
 <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
   <h1 class="text-2xl">Demandes</h1>
   <div class="flex items-center gap-2">
-    <form method="get" action="/demandes/export.csv" id="export-form" class="flex items-center gap-2">
+    <form method="get" action="/demandes/export.csv" id="export-form" class="flex flex-wrap items-center gap-2">
       <label class="flex items-center gap-1 text-xs text-brand-muted"><input type="checkbox" name="include_health" value="1"> inclure les besoins (santé)</label>
       <button type="submit" class="btn-secondary btn-sm" data-export-link>Exporter en CSV</button>
     </form>
@@ -28,11 +28,23 @@
     {% endfor %}
   </div>
 
-  <div class="grid gap-4 md:grid-cols-4">
-    <div class="md:col-span-2">
-      <label class="label" for="q">Recherche</label>
-      <input id="q" name="q" type="search" class="input" value="{{ f.q }}" placeholder="Nom, téléphone, e-mail, référence, adresse…" autocomplete="off">
-    </div>
+  <div>
+    <label class="label" for="q">Recherche</label>
+    <input id="q" name="q" type="search" class="input" value="{{ f.q }}" placeholder="Nom, téléphone, e-mail, référence, adresse…" autocomplete="off">
+  </div>
+
+  {# Filtres détaillés : repliés sur téléphone (admin.js les ouvre d'office sur ordinateur). Ils restent
+     dans le formulaire même repliés, donc toujours pris en compte. Ouverts si l'un d'eux est actif. #}
+  {% set advanced_active = f.pickup_from or f.pickup_to or f.received_from or f.received_to
+     or f.has_account is not none or f.statuses or f.origins or f.wheelchair or f.auto_closed
+     or f.sort != 'pickup' %}
+  <details id="filters-more" class="group" {% if advanced_active %}open{% endif %}>
+  <summary class="btn-secondary btn-sm cursor-pointer list-none marker:hidden">
+    <span class="group-open:hidden">Plus de filtres{% if advanced_active %} (actifs){% endif %}</span>
+    <span class="hidden group-open:inline">Masquer les filtres</span>
+  </summary>
+  <div class="mt-4 space-y-4">
+  <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
     <div>
       <label class="label" for="pickup_from">Prise en charge du</label>
       <input id="pickup_from" name="pickup_from" type="date" class="input" value="{{ f.pickup_from or '' }}">
@@ -49,7 +61,7 @@
       <label class="label" for="received_to">au</label>
       <input id="received_to" name="received_to" type="date" class="input" value="{{ f.received_to or '' }}">
     </div>
-    <div>
+    <div class="col-span-2 md:col-span-1">
       <label class="label" for="account">Compte</label>
       <select id="account" name="account" class="input">
         <option value="">Tous</option>
@@ -57,7 +69,7 @@
         <option value="no" {% if f.has_account is false %}selected{% endif %}>Sans compte</option>
       </select>
     </div>
-    <div>
+    <div class="col-span-2 md:col-span-1">
       <label class="label" for="sort">Tri</label>
       <select id="sort" name="sort" class="input">
         <option value="pickup" {% if f.sort == 'pickup' %}selected{% endif %}>Prise en charge (proche d'abord)</option>
@@ -91,6 +103,8 @@
       </div>
     </fieldset>
   </div>
+  </div>
+  </details>
   <div class="flex items-center gap-3">
     <noscript><button type="submit" class="btn-primary btn-sm">Filtrer</button></noscript>
     <a href="/demandes" class="text-sm text-brand-accent hover:underline">Réinitialiser</a>

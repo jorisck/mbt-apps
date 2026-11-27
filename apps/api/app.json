@@ -1,0 +1,24 @@
+{
+  "name": "mbt-api",
+  "description": "API publique, espace de gestion et worker HandyCab / MBT Taxis",
+  "repository": "https://github.com/justkoding/mbt",
+  "stack": "heroku-24",
+  "addons": ["heroku-postgresql:essential-0"],
+  "formation": {
+    "web": { "quantity": 1, "size": "basic" },
+    "worker": { "quantity": 1, "size": "basic" }
+  },
+  "env": {
+    "APP_ENV": { "description": "production | staging", "value": "staging" },
+    "ADMIN_HOST": { "description": "Hôte de l'espace de gestion", "value": "gestion.mbttaxis.be" },
+    "PUBLIC_API_HOST": { "description": "Hôte de l'API publique", "value": "api.mbttaxis.be" },
+    "SECRET_KEY": { "generator": "secret" },
+    "APP_ENCRYPTION_KEYS": { "description": "k1:<32 octets base64> — générer avec python -m app.cli gen-key" },
+    "BFF_KEYS": { "description": "site_mbt:<clé>,site_handycab:<clé>" },
+    "RESEND_API_KEY": { "description": "Clé Resend" },
+    "ADMIN_NOTIFY_EMAILS": { "description": "Adresses de notification, séparées par des virgules" }
+  },
+  "scripts": {
+    "postdeploy": "python -m app.cli release"
+  }
+}

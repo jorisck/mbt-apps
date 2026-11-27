@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf %}
+{% block title %}Connexions webhooks{% endblock %}
+
+{% macro endpoint_status_badge(s) %}
+{% if s == 'active' %}<span class="badge-completed">Actif</span>
+{% elif s == 'inactive' %}<span class="badge-received">Inactif</span>
+{% else %}<span class="badge-cancelled">Archivé</span>{% endif %}
+{% endmacro %}
+
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-2xl">Connexions webhooks</h1>
+  <div class="flex gap-2">
+    <a href="/envois" class="btn-secondary btn-sm">Journal des envois</a>
+    <a href="/connexions/nouveau" class="btn-primary btn-sm">Nouvelle connexion</a>
+  </div>
+</div>
+
+{% if endpoints %}
+<section class="card p-0" aria-label="Liste des connexions">
+  {# Mobile : cartes #}
+  <ul class="divide-y divide-brand-border md:hidden">
+    {% for ep in endpoints %}
+    <li class="space-y-2 p-4">
+      <div class="flex items-start justify-between gap-2">
+        <a href="/connexions/{{ ep.id }}" class="font-semibold text-brand-accent hover:underline">{{ ep.name }}</a>
+        {{ endpoint_status_badge(ep.status) }}
+      </div>
+      <p class="break-all text-xs text-brand-muted">{{ ep.url }}</p>
+      <p class="text-xs text-brand-muted">
+        {{ ep.events|length }} événement(s) · créée {{ ep.created_at|ago }}
+      </p>
+    </li>
+    {% endfor %}
+  </ul>
+  {# Tableau ≥ 768 px #}
+  <div class="hidden overflow-x-auto md:block">
+    <table class="min-w-full divide-y divide-brand-border">
+      <thead>
+        <tr>
+          <th class="th">Nom</th>
+          <th class="th">URL</th>
+          <th class="th">Statut</th>
+          <th class="th">Événements</th>
+          <th class="th">Créée</th>
+          <th class="th"><span class="sr-only">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-brand-border">
+        {% for ep in endpoints %}
+        <tr>
+          <td class="td font-semibold">
+            <a href="/connexions/{{ ep.id }}" class="text-brand-accent hover:underline">{{ ep.name }}</a>
+          </td>
+          <td class="td max-w-xs truncate text-xs text-brand-muted">{{ ep.url }}</td>
+          <td class="td">{{ endpoint_status_badge(ep.status) }}</td>
+          <td class="td text-xs text-brand-muted">{{ ep.events|join(', ') }}</td>
+          <td class="td whitespace-nowrap text-xs text-brand-muted">{{ ep.created_at|ago }}</td>
+          <td class="td whitespace-nowrap">
+            <a href="/connexions/{{ ep.id }}" class="text-xs text-brand-accent hover:underline">Gérer</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% else %}
+<div class="card py-12 text-center">
+  <p class="text-brand-muted">Aucune connexion webhook configurée.</p>
+  <a href="/connexions/nouveau" class="btn-primary mt-4 inline-block">Créer la première connexion</a>
+</div>
+{% endif %}
+{% endblock %}
